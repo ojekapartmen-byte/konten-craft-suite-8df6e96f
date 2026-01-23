@@ -1,203 +1,272 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { GenerateButton } from "@/components/ui/GenerateButton";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Slider } from "@/components/ui/slider";
-import { Mic2, Play, Pause, Download } from "lucide-react";
+import { TextSourceSelector } from "@/components/voice-dubbing/TextSourceSelector";
+import { MediaUploader } from "@/components/voice-dubbing/MediaUploader";
+import { PreprocessingPanel } from "@/components/voice-dubbing/PreprocessingPanel";
+import { DurationEstimator } from "@/components/voice-dubbing/DurationEstimator";
+import { VoiceControls } from "@/components/voice-dubbing/VoiceControls";
+import { AudioPlayer } from "@/components/voice-dubbing/AudioPlayer";
+import { VoiceHistory } from "@/components/voice-dubbing/VoiceHistory";
+import { TextSourceType, PreprocessingMode, UploadedMedia, VoiceGenerationResult, ELEVENLABS_VOICES } from "@/types/voiceDubbing";
+import { DraftHistory } from "@/types/textGenerator";
+import { preprocessTextForVoice } from "@/lib/textPreprocessing";
+import { Mic2, AlertTriangle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-
-const voices = [
-  { value: "emma", label: "Emma (Female, US)", description: "Warm and friendly" },
-  { value: "james", label: "James (Male, UK)", description: "Professional and clear" },
-  { value: "sarah", label: "Sarah (Female, AU)", description: "Energetic and upbeat" },
-  { value: "alex", label: "Alex (Male, US)", description: "Deep and authoritative" },
-  { value: "maya", label: "Maya (Female, UK)", description: "Calm and soothing" },
-];
+import { supabase } from "@/integrations/supabase/client";
 
 const VoiceDubbing = () => {
-  const [text, setText] = useState("");
-  const [voice, setVoice] = useState("emma");
-  const [speed, setSpeed] = useState([1]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [audioGenerated, setAudioGenerated] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(false);
   const { toast } = useToast();
+  
+  // Text source state
+  const [textSource, setTextSource] = useState<TextSourceType>('manual');
+  const [manualText, setManualText] = useState("");
+  const [selectedDraftId, setSelectedDraftId] = useState<string>();
+  const [drafts, setDrafts] = useState<DraftHistory[]>([]);
+  
+  // Preprocessing state
+  const [preprocessingEnabled, setPreprocessingEnabled] = useState(true);
+  const [preprocessingMode, setPreprocessingMode] = useState<PreprocessingMode>('natural');
+  const [preprocessedText, setPreprocessedText] = useState("");
+  
+  // Media upload state
+  const [uploadedMedia, setUploadedMedia] = useState<UploadedMedia>();
+  
+  // Voice controls state
+  const [selectedVoice, setSelectedVoice] = useState(ELEVENLABS_VOICES[0].id);
+  const [speed, setSpeed] = useState(1.0);
+  
+  // Generation state
+  const [isLoading, setIsLoading] = useState(false);
+  const [generatedAudio, setGeneratedAudio] = useState<{ url: string; duration: number } | null>(null);
+  const [quotaWarning, setQuotaWarning] = useState(false);
+  
+  // History state
+  const [history, setHistory] = useState<VoiceGenerationResult[]>([]);
 
-  const selectedVoice = voices.find((v) => v.value === voice);
+  // Get the current text to use
+  const getCurrentText = (): string => {
+    if (textSource === 'manual') {
+      return manualText;
+    }
+    const draft = drafts.find(d => d.id === selectedDraftId);
+    return draft?.content.content.mainScript || "";
+  };
+
+  // Get the final text (preprocessed or original)
+  const getFinalText = (): string => {
+    const original = getCurrentText();
+    if (preprocessingEnabled && preprocessedText) {
+      return preprocessedText;
+    }
+    return original;
+  };
+
+  const handleSelectDraft = (draft: DraftHistory) => {
+    setSelectedDraftId(draft.id);
+    if (preprocessingEnabled) {
+      setPreprocessedText(preprocessTextForVoice(draft.content.content.mainScript, preprocessingMode));
+    }
+  };
 
   const handleGenerate = async () => {
+    const text = getFinalText();
+    
     if (!text.trim()) {
       toast({
-        title: "Please enter text",
-        description: "Enter the text you want to convert to speech",
+        title: "Teks kosong",
+        description: "Masukkan teks untuk dikonversi ke voice",
         variant: "destructive",
       });
       return;
     }
 
     setIsLoading(true);
-    await new Promise((resolve) => setTimeout(resolve, 2500));
-    setAudioGenerated(true);
-    setIsLoading(false);
-    toast({
-      title: "Voice generated!",
-      description: "Your audio is ready to play",
+    setQuotaWarning(false);
+
+    try {
+      const response = await fetch(
+        `https://xdlssuosmuoeyrfbcnru.supabase.co/functions/v1/elevenlabs-tts`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhkbHNzdW9zbXVvZXlyZmJjbnJ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkxNjc2MjMsImV4cCI6MjA4NDc0MzYyM30.FEO9ecrj9IP3yP_k1fsVGR7lvVqqydBpevKfNp5NaPk",
+            "Authorization": `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhkbHNzdW9zbXVvZXlyZmJjbnJ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkxNjc2MjMsImV4cCI6MjA4NDc0MzYyM30.FEO9ecrj9IP3yP_k1fsVGR7lvVqqydBpevKfNp5NaPk`,
+          },
+          body: JSON.stringify({
+            text,
+            voiceId: selectedVoice,
+            speed,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        if (data.quotaError) {
+          setQuotaWarning(true);
+        }
+        throw new Error(data.error || "Failed to generate voice");
+      }
+
+      // Create audio URL from base64
+      const audioUrl = `data:audio/mpeg;base64,${data.audioContent}`;
+      
+      setGeneratedAudio({
+        url: audioUrl,
+        duration: data.duration,
+      });
+
+      // Add to history
+      const result: VoiceGenerationResult = {
+        id: Date.now().toString(),
+        text: text.substring(0, 100) + (text.length > 100 ? '...' : ''),
+        voiceId: selectedVoice,
+        speed,
+        audioUrl,
+        duration: data.duration,
+        createdAt: new Date(),
+        sourceType: textSource,
+        sourceId: selectedDraftId,
+      };
+      setHistory(prev => [result, ...prev]);
+
+      toast({
+        title: "Voice berhasil digenerate!",
+        description: `Durasi: ${data.duration} detik`,
+      });
+    } catch (error) {
+      console.error("TTS error:", error);
+      toast({
+        title: "Gagal generate voice",
+        description: error instanceof Error ? error.message : "Terjadi kesalahan",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handlePlayFromHistory = (result: VoiceGenerationResult) => {
+    setGeneratedAudio({
+      url: result.audioUrl,
+      duration: result.duration,
     });
   };
 
-  const togglePlayback = () => {
-    setIsPlaying(!isPlaying);
-    if (!isPlaying) {
-      // Simulate playback ending
-      setTimeout(() => setIsPlaying(false), 3000);
-    }
+  const handleDeleteFromHistory = (id: string) => {
+    setHistory(prev => prev.filter(h => h.id !== id));
   };
+
+  const currentText = getCurrentText();
 
   return (
     <MainLayout>
       <PageHeader
         icon={Mic2}
         title="Voice Dubbing"
-        description="Transform text into natural-sounding speech"
+        description="Ubah teks menjadi voice over dengan ElevenLabs AI"
       />
 
-      <div className="grid gap-8 lg:grid-cols-2">
-        {/* Input Section */}
-        <div className="space-y-6 animate-fade-in" style={{ animationDelay: "0.1s" }}>
-          <div className="glass-card rounded-xl p-6">
-            <div className="space-y-5">
-              <div>
-                <Label htmlFor="text" className="text-sm font-medium text-foreground">
-                  Enter your text
-                </Label>
-                <Textarea
-                  id="text"
-                  placeholder="Type or paste the text you want to convert to speech..."
-                  value={text}
-                  onChange={(e) => setText(e.target.value)}
-                  className="mt-2 min-h-[150px] resize-none border-border bg-secondary/50 text-foreground placeholder:text-muted-foreground focus:border-primary"
+      <div className="grid gap-6 lg:grid-cols-[1fr,400px]">
+        {/* Left Column - Input */}
+        <div className="space-y-6">
+          <div className="glass-card rounded-xl p-6 animate-fade-in">
+            <div className="space-y-6">
+              {/* Text Source */}
+              <TextSourceSelector
+                sourceType={textSource}
+                onSourceTypeChange={setTextSource}
+                manualText={manualText}
+                onManualTextChange={setManualText}
+                drafts={drafts}
+                selectedDraftId={selectedDraftId}
+                onSelectDraft={handleSelectDraft}
+              />
+
+              {/* Media Upload */}
+              <MediaUploader
+                uploadedMedia={uploadedMedia}
+                onMediaUpload={setUploadedMedia}
+                onMediaRemove={() => setUploadedMedia(undefined)}
+              />
+
+              {/* Preprocessing */}
+              {currentText && (
+                <PreprocessingPanel
+                  originalText={currentText}
+                  preprocessedText={preprocessedText}
+                  mode={preprocessingMode}
+                  onModeChange={setPreprocessingMode}
+                  onPreprocess={setPreprocessedText}
+                  isEnabled={preprocessingEnabled}
+                  onEnabledChange={setPreprocessingEnabled}
                 />
-                <p className="mt-2 text-xs text-muted-foreground">
-                  {text.length} characters
-                </p>
-              </div>
+              )}
 
-              <div>
-                <Label className="text-sm font-medium text-foreground">Select Voice</Label>
-                <Select value={voice} onValueChange={setVoice}>
-                  <SelectTrigger className="mt-2 border-border bg-secondary/50">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {voices.map((v) => (
-                      <SelectItem key={v.value} value={v.value}>
-                        <div>
-                          <span>{v.label}</span>
-                          <span className="ml-2 text-xs text-muted-foreground">
-                            - {v.description}
-                          </span>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <div className="flex items-center justify-between">
-                  <Label className="text-sm font-medium text-foreground">Speed</Label>
-                  <span className="text-sm text-muted-foreground">{speed[0]}x</span>
-                </div>
-                <Slider
-                  value={speed}
-                  onValueChange={setSpeed}
-                  min={0.5}
-                  max={2}
-                  step={0.1}
-                  className="mt-3"
+              {/* Duration Estimator */}
+              {currentText && (
+                <DurationEstimator
+                  text={getFinalText()}
+                  uploadedMedia={uploadedMedia}
+                  currentSpeed={speed}
+                  onSpeedSuggestion={setSpeed}
                 />
-                <div className="mt-1 flex justify-between text-xs text-muted-foreground">
-                  <span>Slower</span>
-                  <span>Faster</span>
-                </div>
-              </div>
+              )}
 
+              {/* Voice Controls */}
+              <VoiceControls
+                selectedVoice={selectedVoice}
+                onVoiceChange={setSelectedVoice}
+                speed={speed}
+                onSpeedChange={setSpeed}
+              />
+
+              {/* Quota Warning */}
+              {quotaWarning && (
+                <div className="flex items-center gap-2 rounded-lg border border-yellow-500/20 bg-yellow-500/10 p-3 text-sm">
+                  <AlertTriangle className="h-4 w-4 text-yellow-500" />
+                  <span>Quota ElevenLabs habis. Periksa plan Anda.</span>
+                </div>
+              )}
+
+              {/* Generate Button */}
               <GenerateButton
                 onClick={handleGenerate}
                 isLoading={isLoading}
-                disabled={!text.trim()}
+                disabled={!currentText.trim()}
                 className="w-full"
               >
                 Generate Voice
               </GenerateButton>
             </div>
           </div>
+
+          {/* Audio Player */}
+          {generatedAudio && (
+            <div className="animate-fade-in">
+              <AudioPlayer
+                audioUrl={generatedAudio.url}
+                duration={generatedAudio.duration}
+                voiceName={ELEVENLABS_VOICES.find(v => v.id === selectedVoice)?.name}
+                speed={speed}
+                onRegenerate={handleGenerate}
+                isRegenerating={isLoading}
+              />
+            </div>
+          )}
         </div>
 
-        {/* Output Section */}
+        {/* Right Column - History */}
         <div className="animate-fade-in" style={{ animationDelay: "0.2s" }}>
-          <div className="glass-card h-full rounded-xl p-6">
-            <Label className="text-sm font-medium text-foreground">Audio Preview</Label>
-
-            <div className="mt-4 flex flex-col items-center justify-center rounded-lg border border-border bg-secondary/30 p-8">
-              {audioGenerated ? (
-                <>
-                  {/* Waveform visualization */}
-                  <div className="mb-6 flex h-20 items-center gap-1">
-                    {Array.from({ length: 40 }).map((_, i) => (
-                      <div
-                        key={i}
-                        className={`w-1 rounded-full bg-primary transition-all duration-150 ${
-                          isPlaying ? "animate-pulse" : ""
-                        }`}
-                        style={{
-                          height: `${Math.random() * 60 + 20}%`,
-                          animationDelay: `${i * 0.05}s`,
-                        }}
-                      />
-                    ))}
-                  </div>
-
-                  <div className="flex items-center gap-4">
-                    <button
-                      onClick={togglePlayback}
-                      className="flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground transition-transform hover:scale-105"
-                    >
-                      {isPlaying ? (
-                        <Pause className="h-6 w-6" />
-                      ) : (
-                        <Play className="ml-1 h-6 w-6" />
-                      )}
-                    </button>
-                    <button className="flex h-10 w-10 items-center justify-center rounded-full border border-border bg-secondary text-foreground transition-colors hover:bg-secondary/80">
-                      <Download className="h-5 w-5" />
-                    </button>
-                  </div>
-
-                  <div className="mt-4 text-center">
-                    <p className="text-sm font-medium text-foreground">
-                      {selectedVoice?.label}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      Speed: {speed[0]}x • Duration: 0:15
-                    </p>
-                  </div>
-                </>
-              ) : (
-                <div className="text-center">
-                  <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-secondary">
-                    <Mic2 className="h-8 w-8 text-muted-foreground" />
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    Your audio will appear here
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
+          <VoiceHistory
+            history={history}
+            onPlayAudio={handlePlayFromHistory}
+            onDelete={handleDeleteFromHistory}
+          />
         </div>
       </div>
     </MainLayout>
