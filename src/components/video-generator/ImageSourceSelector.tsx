@@ -2,21 +2,21 @@ import { useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ImageIcon, Upload, History, X, GripVertical, Plus } from "lucide-react";
+import { ImageIcon, Upload, Database, X, GripVertical, Plus, Heart, Loader2 } from "lucide-react";
 import { SlideImage } from "@/types/videoGenerator";
+import { useGeneratedImages, GeneratedImage } from "@/hooks/useGeneratedImages";
 
 interface ImageSourceSelectorProps {
   slides: SlideImage[];
   onSlidesChange: (slides: SlideImage[]) => void;
-  generatedImages: { id: string; src: string; prompt: string }[];
 }
 
 export const ImageSourceSelector = ({
   slides,
   onSlidesChange,
-  generatedImages,
 }: ImageSourceSelectorProps) => {
   const [activeTab, setActiveTab] = useState<string>("upload");
+  const { images: dbImages, isLoading: isLoadingDbImages } = useGeneratedImages();
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -39,11 +39,11 @@ export const ImageSourceSelector = ({
     e.target.value = '';
   };
 
-  const handleSelectGeneratedImage = (img: { id: string; src: string; prompt: string }) => {
+  const handleSelectDbImage = (img: GeneratedImage) => {
     const newSlide: SlideImage = {
       id: `slide-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      src: img.src,
-      name: img.prompt.substring(0, 30) + '...',
+      src: img.imageUrl,
+      name: img.title || img.prompt.substring(0, 30) + '...',
       duration: 3,
       source: 'generator',
     };
@@ -82,9 +82,9 @@ export const ImageSourceSelector = ({
             <Upload className="h-4 w-4" />
             Upload
           </TabsTrigger>
-          <TabsTrigger value="generator" className="gap-2">
-            <History className="h-4 w-4" />
-            From Generator
+          <TabsTrigger value="database" className="gap-2">
+            <Database className="h-4 w-4" />
+            Dari Galeri
           </TabsTrigger>
         </TabsList>
 
@@ -105,22 +105,32 @@ export const ImageSourceSelector = ({
           </label>
         </TabsContent>
 
-        <TabsContent value="generator">
-          {generatedImages.length === 0 ? (
+        <TabsContent value="database">
+          {isLoadingDbImages ? (
+            <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-border bg-secondary/30 py-8">
+              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground mb-2" />
+              <p className="text-sm text-muted-foreground">Memuat gambar...</p>
+            </div>
+          ) : dbImages.length === 0 ? (
             <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-border bg-secondary/30 py-8">
               <ImageIcon className="h-8 w-8 text-muted-foreground mb-2" />
-              <p className="text-sm text-muted-foreground">No generated images yet</p>
-              <p className="text-xs text-muted-foreground">Generate images in Image Generator first</p>
+              <p className="text-sm text-muted-foreground">Belum ada gambar di galeri</p>
+              <p className="text-xs text-muted-foreground">Generate gambar di Image Generator dulu</p>
             </div>
           ) : (
             <div className="grid grid-cols-3 gap-2 max-h-48 overflow-y-auto">
-              {generatedImages.map((img) => (
+              {dbImages.map((img) => (
                 <button
                   key={img.id}
-                  onClick={() => handleSelectGeneratedImage(img)}
+                  onClick={() => handleSelectDbImage(img)}
                   className="relative aspect-square rounded-lg overflow-hidden border-2 border-transparent hover:border-primary transition-colors"
                 >
-                  <img src={img.src} alt={img.prompt} className="w-full h-full object-cover" />
+                  <img src={img.imageUrl} alt={img.title || img.prompt} className="w-full h-full object-cover" />
+                  {img.isFavorite && (
+                    <div className="absolute left-1 top-1">
+                      <Heart className="h-3 w-3 fill-red-500 text-red-500" />
+                    </div>
+                  )}
                   <div className="absolute inset-0 bg-black/50 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center">
                     <Plus className="h-6 w-6 text-white" />
                   </div>

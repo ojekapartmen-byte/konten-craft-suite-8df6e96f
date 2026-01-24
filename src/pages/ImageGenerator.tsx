@@ -5,9 +5,12 @@ import { GenerateButton } from "@/components/ui/GenerateButton";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ImageIcon, Download, RefreshCw } from "lucide-react";
+import { ImageIcon, Download, RefreshCw, Save } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useGeneratedImages } from "@/hooks/useGeneratedImages";
+import { ImageGallery } from "@/components/image-generator/ImageGallery";
+import { Button } from "@/components/ui/button";
 
 const styles = [
   { value: "realistic", label: "Photorealistic" },
@@ -30,8 +33,19 @@ const ImageGenerator = () => {
   const [style, setStyle] = useState("realistic");
   const [aspectRatio, setAspectRatio] = useState("1:1");
   const [isLoading, setIsLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
+  const [lastGeneratedPrompt, setLastGeneratedPrompt] = useState("");
   const { toast } = useToast();
+  
+  const {
+    images,
+    isLoading: isLoadingImages,
+    saveImage,
+    updateImage,
+    deleteImage,
+    toggleFavorite,
+  } = useGeneratedImages();
 
   const handleGenerate = async () => {
     if (!prompt.trim()) {
@@ -68,22 +82,7 @@ const ImageGenerator = () => {
       }
 
       setGeneratedImage(data.imageUrl);
-      
-      // Save to localStorage for Video Generator
-      try {
-        const savedImages = localStorage.getItem('generatedImages');
-        const images = savedImages ? JSON.parse(savedImages) : [];
-        const newImage = {
-          id: `img-${Date.now()}`,
-          src: data.imageUrl,
-          prompt: prompt.trim(),
-        };
-        // Keep last 20 images
-        const updatedImages = [newImage, ...images].slice(0, 20);
-        localStorage.setItem('generatedImages', JSON.stringify(updatedImages));
-      } catch (e) {
-        console.error('Failed to save image to history:', e);
-      }
+      setLastGeneratedPrompt(prompt.trim());
 
       toast({
         title: "Image generated!",
@@ -101,11 +100,26 @@ const ImageGenerator = () => {
     }
   };
 
+  const handleSaveToGallery = async () => {
+    if (!generatedImage) return;
+
+    setIsSaving(true);
+    try {
+      await saveImage({
+        prompt: lastGeneratedPrompt,
+        style,
+        aspectRatio,
+        imageUrl: generatedImage,
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   const handleDownload = async () => {
     if (!generatedImage) return;
 
     try {
-      // For base64 images, create a download link
       if (generatedImage.startsWith('data:')) {
         const link = document.createElement('a');
         link.href = generatedImage;
@@ -114,7 +128,6 @@ const ImageGenerator = () => {
         link.click();
         document.body.removeChild(link);
       } else {
-        // For URL images, fetch and download
         const response = await fetch(generatedImage);
         const blob = await response.blob();
         const url = URL.createObjectURL(blob);
@@ -211,33 +224,22 @@ const ImageGenerator = () => {
             </div>
           </div>
 
-          {/* Style Examples */}
-          <div className="glass-card rounded-xl p-6">
-            <Label className="text-sm font-medium text-foreground">Tips for better results</Label>
-            <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
-              <li className="flex items-start gap-2">
-                <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
-                Be specific about lighting, mood, and composition
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
-                Include art style references (e.g., "in the style of...")
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
-                Mention camera angles or lens types for realism
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        {/* Output Section */}
-        <div className="animate-fade-in" style={{ animationDelay: "0.2s" }}>
+          {/* Generated Output */}
           <div className="glass-card rounded-xl p-6">
             <div className="mb-4 flex items-center justify-between">
               <Label className="text-sm font-medium text-foreground">Generated Image</Label>
               {generatedImage && (
                 <div className="flex gap-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleSaveToGallery}
+                    disabled={isSaving}
+                    className="gap-1.5"
+                  >
+                    <Save className="h-3.5 w-3.5" />
+                    {isSaving ? 'Saving...' : 'Simpan'}
+                  </Button>
                   <button
                     onClick={handleGenerate}
                     className="flex items-center gap-1.5 rounded-md px-2 py-1 text-xs text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
@@ -302,6 +304,36 @@ const ImageGenerator = () => {
               </div>
             )}
           </div>
+
+          {/* Tips */}
+          <div className="glass-card rounded-xl p-6">
+            <Label className="text-sm font-medium text-foreground">Tips for better results</Label>
+            <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
+              <li className="flex items-start gap-2">
+                <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
+                Be specific about lighting, mood, and composition
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
+                Include art style references (e.g., "in the style of...")
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
+                Mention camera angles or lens types for realism
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        {/* Gallery Section */}
+        <div className="animate-fade-in lg:sticky lg:top-8" style={{ animationDelay: "0.2s" }}>
+          <ImageGallery
+            images={images}
+            isLoading={isLoadingImages}
+            onDelete={deleteImage}
+            onUpdate={updateImage}
+            onToggleFavorite={toggleFavorite}
+          />
         </div>
       </div>
     </MainLayout>
