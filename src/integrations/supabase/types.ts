@@ -14,7 +14,51 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      content_drafts: {
+        Row: {
+          brand_voice: Json | null
+          content: Json
+          created_at: string
+          duration: number
+          field_values: Json
+          id: string
+          output_format: string
+          production_options: Json | null
+          template_id: string
+          title: string
+          tone: string
+          updated_at: string
+        }
+        Insert: {
+          brand_voice?: Json | null
+          content: Json
+          created_at?: string
+          duration: number
+          field_values?: Json
+          id?: string
+          output_format: string
+          production_options?: Json | null
+          template_id: string
+          title: string
+          tone: string
+          updated_at?: string
+        }
+        Update: {
+          brand_voice?: Json | null
+          content?: Json
+          created_at?: string
+          duration?: number
+          field_values?: Json
+          id?: string
+          output_format?: string
+          production_options?: Json | null
+          template_id?: string
+          title?: string
+          tone?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

@@ -20,14 +20,16 @@ import {
   OutputFormat, 
   BrandVoice, 
   GeneratedContent,
-  DraftHistory 
+  DraftHistory,
 } from "@/types/textGenerator";
 import { FileText, Save, RotateCcw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useContentDrafts } from "@/hooks/useContentDrafts";
 import { supabase } from "@/integrations/supabase/client";
 
 const TextGenerator = () => {
   const { toast } = useToast();
+  const { drafts, saveDraft, deleteDraft, duplicateDraft, renameDraft } = useContentDrafts();
   
   // Core state
   const [selectedTemplate, setSelectedTemplate] = useState<TemplateType>('tiktok-60s');
@@ -56,9 +58,6 @@ const TextGenerator = () => {
     includeShotList: true,
     includeSubtitleFriendly: true,
   });
-  
-  // History/drafts state
-  const [drafts, setDrafts] = useState<DraftHistory[]>([]);
   
   // Get current template config
   const currentTemplate = useMemo(() => 
@@ -165,23 +164,15 @@ const TextGenerator = () => {
     }
   };
 
-  const handleSaveDraft = () => {
+  const handleSaveDraft = async () => {
     if (!generatedContent) return;
     
-    const draft: DraftHistory = {
-      id: generateId(),
-      title: generatedContent.title,
-      templateId: selectedTemplate,
-      content: generatedContent,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-    
-    setDrafts(prev => [draft, ...prev]);
-    toast({
-      title: "Draft tersimpan!",
-      description: "Kamu bisa akses draft ini nanti dari panel Riwayat",
-    });
+    await saveDraft(
+      generatedContent, 
+      fieldValues, 
+      brandVoice as unknown as Record<string, unknown>, 
+      productionOptions as unknown as Record<string, unknown>
+    );
   };
 
   const handleLoadDraft = (draft: DraftHistory) => {
@@ -193,32 +184,16 @@ const TextGenerator = () => {
     });
   };
 
-  const handleDeleteDraft = (id: string) => {
-    setDrafts(prev => prev.filter(d => d.id !== id));
-    toast({
-      title: "Draft dihapus",
-    });
+  const handleDeleteDraft = async (id: string) => {
+    await deleteDraft(id);
   };
 
-  const handleDuplicateDraft = (draft: DraftHistory) => {
-    const newDraft: DraftHistory = {
-      ...draft,
-      id: generateId(),
-      title: `${draft.title} (Copy)`,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-    setDrafts(prev => [newDraft, ...prev]);
-    toast({
-      title: "Draft diduplikasi",
-      description: newDraft.title,
-    });
+  const handleDuplicateDraft = async (draft: DraftHistory) => {
+    await duplicateDraft(draft);
   };
 
-  const handleRenameDraft = (id: string, newTitle: string) => {
-    setDrafts(prev => prev.map(d => 
-      d.id === id ? { ...d, title: newTitle, updatedAt: new Date() } : d
-    ));
+  const handleRenameDraft = async (id: string, newTitle: string) => {
+    await renameDraft(id, newTitle);
   };
 
   const handleReset = () => {

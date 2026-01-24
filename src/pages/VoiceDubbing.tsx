@@ -14,16 +14,16 @@ import { DraftHistory } from "@/types/textGenerator";
 import { preprocessTextForVoice } from "@/lib/textPreprocessing";
 import { Mic2, AlertTriangle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { useContentDrafts } from "@/hooks/useContentDrafts";
 
 const VoiceDubbing = () => {
   const { toast } = useToast();
+  const { drafts } = useContentDrafts();
   
   // Text source state
   const [textSource, setTextSource] = useState<TextSourceType>('manual');
   const [manualText, setManualText] = useState("");
   const [selectedDraftId, setSelectedDraftId] = useState<string>();
-  const [drafts, setDrafts] = useState<DraftHistory[]>([]);
   
   // Preprocessing state
   const [preprocessingEnabled, setPreprocessingEnabled] = useState(true);
