@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Play, Pause, SkipBack, SkipForward, Volume2, VolumeX, Download } from "lucide-react";
+import { Play, Pause, SkipBack, SkipForward, Volume2, VolumeX, Download, Loader2 } from "lucide-react";
 import { SlideImage, AudioTrack, TransitionType } from "@/types/videoGenerator";
 
 interface SlideshowPreviewProps {
@@ -10,7 +10,9 @@ interface SlideshowPreviewProps {
   transition: TransitionType;
   isGenerating: boolean;
   isGenerated: boolean;
+  renderProgress: number;
   onDownload: () => void;
+  isRendering: boolean;
 }
 
 export const SlideshowPreview = ({
@@ -19,7 +21,9 @@ export const SlideshowPreview = ({
   transition,
   isGenerating,
   isGenerated,
+  renderProgress,
   onDownload,
+  isRendering,
 }: SlideshowPreviewProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -139,10 +143,20 @@ export const SlideshowPreview = ({
             variant="ghost"
             size="sm"
             onClick={onDownload}
+            disabled={isRendering}
             className="gap-2"
           >
-            <Download className="h-4 w-4" />
-            Download MP4
+            {isRendering ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Rendering {Math.round(renderProgress)}%
+              </>
+            ) : (
+              <>
+                <Download className="h-4 w-4" />
+                Download Video
+              </>
+            )}
           </Button>
         )}
       </div>
@@ -238,11 +252,21 @@ export const SlideshowPreview = ({
           </div>
         )}
 
-        {isGenerating && (
+        {(isGenerating || isRendering) && (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/80 backdrop-blur-sm">
             <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-            <p className="mt-4 text-sm text-muted-foreground">Creating your video...</p>
-            <p className="text-xs text-muted-foreground">This may take a moment</p>
+            <p className="mt-4 text-sm text-muted-foreground">
+              {isRendering ? `Rendering video... ${Math.round(renderProgress)}%` : 'Creating your video...'}
+            </p>
+            {isRendering && (
+              <div className="mt-2 w-48 h-2 bg-secondary rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-primary transition-all duration-300"
+                  style={{ width: `${renderProgress}%` }}
+                />
+              </div>
+            )}
+            <p className="mt-2 text-xs text-muted-foreground">This may take a moment</p>
           </div>
         )}
       </div>
