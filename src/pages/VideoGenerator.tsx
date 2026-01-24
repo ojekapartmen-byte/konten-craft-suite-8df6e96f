@@ -9,6 +9,7 @@ import { ImageSourceSelector } from "@/components/video-generator/ImageSourceSel
 import { AudioSourceSelector } from "@/components/video-generator/AudioSourceSelector";
 import { TransitionSelector } from "@/components/video-generator/TransitionSelector";
 import { SlideshowPreview } from "@/components/video-generator/SlideshowPreview";
+import { renderVideo, downloadBlob } from "@/lib/videoRenderer";
 
 // Mock data - in production, these would come from localStorage or database
 const MOCK_GENERATED_IMAGES: { id: string; src: string; prompt: string }[] = [];
@@ -27,6 +28,8 @@ const VideoGenerator = () => {
   const [transition, setTransition] = useState<TransitionType>('fade');
   const [isLoading, setIsLoading] = useState(false);
   const [isGenerated, setIsGenerated] = useState(false);
+  const [isRendering, setIsRendering] = useState(false);
+  const [renderProgress, setRenderProgress] = useState(0);
   const [generatedImages, setGeneratedImages] = useState<{ id: string; src: string; prompt: string }[]>(MOCK_GENERATED_IMAGES);
   const [voiceHistory, setVoiceHistory] = useState<VoiceHistoryItem[]>([]);
   const { toast } = useToast();
@@ -69,14 +72,13 @@ const VideoGenerator = () => {
     setIsGenerated(false);
 
     try {
-      // Simulate video generation - in production, this would call an API
-      // to actually render the video with FFmpeg or similar
-      await new Promise((resolve) => setTimeout(resolve, 3000));
+      // Short delay to show loading state
+      await new Promise((resolve) => setTimeout(resolve, 500));
 
       setIsGenerated(true);
       toast({
-        title: "Video created!",
-        description: `Slideshow with ${slides.length} images is ready`,
+        title: "Video ready!",
+        description: `Slideshow with ${slides.length} images is ready. Click Download to render.`,
       });
     } catch (error) {
       console.error('Video generation error:', error);
@@ -90,13 +92,48 @@ const VideoGenerator = () => {
     }
   };
 
-  const handleDownload = () => {
-    // In a real implementation, this would download the rendered video
-    // For now, we'll show a toast explaining this is a preview feature
-    toast({
-      title: "Download feature",
-      description: "Video rendering requires a backend service. Preview mode only.",
-    });
+  const handleDownload = async () => {
+    if (slides.length === 0) return;
+
+    setIsRendering(true);
+    setRenderProgress(0);
+
+    try {
+      toast({
+        title: "Rendering video...",
+        description: "This may take a few moments depending on video length.",
+      });
+
+      const videoBlob = await renderVideo({
+        slides,
+        audio,
+        transition,
+        width: 1920,
+        height: 1080,
+        fps: 30,
+        onProgress: (progress) => {
+          setRenderProgress(progress);
+        },
+      });
+
+      const extension = videoBlob.type.includes('mp4') ? 'mp4' : 'webm';
+      downloadBlob(videoBlob, `slideshow-${Date.now()}.${extension}`);
+
+      toast({
+        title: "Video downloaded!",
+        description: `Your ${extension.toUpperCase()} video has been saved.`,
+      });
+    } catch (error) {
+      console.error('Video rendering error:', error);
+      toast({
+        title: "Rendering failed",
+        description: error instanceof Error ? error.message : "Failed to render video",
+        variant: "destructive",
+      });
+    } finally {
+      setIsRendering(false);
+      setRenderProgress(0);
+    }
   };
 
   const totalDuration = slides.reduce((acc, s) => acc + s.duration, 0);
@@ -147,7 +184,9 @@ const VideoGenerator = () => {
             transition={transition}
             isGenerating={isLoading}
             isGenerated={isGenerated}
+            renderProgress={renderProgress}
             onDownload={handleDownload}
+            isRendering={isRendering}
           />
         </div>
       </div>
