@@ -68,6 +68,23 @@ const ImageGenerator = () => {
       }
 
       setGeneratedImage(data.imageUrl);
+      
+      // Save to localStorage for Video Generator
+      try {
+        const savedImages = localStorage.getItem('generatedImages');
+        const images = savedImages ? JSON.parse(savedImages) : [];
+        const newImage = {
+          id: `img-${Date.now()}`,
+          src: data.imageUrl,
+          prompt: prompt.trim(),
+        };
+        // Keep last 20 images
+        const updatedImages = [newImage, ...images].slice(0, 20);
+        localStorage.setItem('generatedImages', JSON.stringify(updatedImages));
+      } catch (e) {
+        console.error('Failed to save image to history:', e);
+      }
+
       toast({
         title: "Image generated!",
         description: "Your image has been created successfully",

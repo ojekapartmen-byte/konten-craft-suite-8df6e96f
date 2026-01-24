@@ -45,6 +45,29 @@ const VoiceDubbing = () => {
   // History state
   const [history, setHistory] = useState<VoiceGenerationResult[]>([]);
 
+  // Load history from localStorage on mount
+  useEffect(() => {
+    try {
+      const savedHistory = localStorage.getItem('voiceHistory');
+      if (savedHistory) {
+        setHistory(JSON.parse(savedHistory));
+      }
+    } catch (e) {
+      console.error('Failed to load voice history:', e);
+    }
+  }, []);
+
+  // Save history to localStorage when it changes
+  useEffect(() => {
+    try {
+      // Keep last 20 items
+      const historyToSave = history.slice(0, 20);
+      localStorage.setItem('voiceHistory', JSON.stringify(historyToSave));
+    } catch (e) {
+      console.error('Failed to save voice history:', e);
+    }
+  }, [history]);
+
   // Get the current text to use
   const getCurrentText = (): string => {
     if (textSource === 'manual') {
