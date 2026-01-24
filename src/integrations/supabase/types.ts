@@ -59,6 +59,48 @@ export type Database = {
         }
         Relationships: []
       }
+      generated_images: {
+        Row: {
+          aspect_ratio: string
+          created_at: string
+          id: string
+          image_url: string
+          is_favorite: boolean
+          prompt: string
+          style: string
+          tags: string[] | null
+          thumbnail_url: string | null
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          aspect_ratio?: string
+          created_at?: string
+          id?: string
+          image_url: string
+          is_favorite?: boolean
+          prompt: string
+          style?: string
+          tags?: string[] | null
+          thumbnail_url?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          aspect_ratio?: string
+          created_at?: string
+          id?: string
+          image_url?: string
+          is_favorite?: boolean
+          prompt?: string
+          style?: string
+          tags?: string[] | null
+          thumbnail_url?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

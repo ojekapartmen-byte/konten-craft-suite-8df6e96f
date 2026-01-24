@@ -11,9 +11,6 @@ import { TransitionSelector } from "@/components/video-generator/TransitionSelec
 import { SlideshowPreview } from "@/components/video-generator/SlideshowPreview";
 import { renderVideo, downloadBlob } from "@/lib/videoRenderer";
 
-// Mock data - in production, these would come from localStorage or database
-const MOCK_GENERATED_IMAGES: { id: string; src: string; prompt: string }[] = [];
-
 interface VoiceHistoryItem {
   id: string;
   text: string;
@@ -30,21 +27,8 @@ const VideoGenerator = () => {
   const [isGenerated, setIsGenerated] = useState(false);
   const [isRendering, setIsRendering] = useState(false);
   const [renderProgress, setRenderProgress] = useState(0);
-  const [generatedImages, setGeneratedImages] = useState<{ id: string; src: string; prompt: string }[]>(MOCK_GENERATED_IMAGES);
   const [voiceHistory, setVoiceHistory] = useState<VoiceHistoryItem[]>([]);
   const { toast } = useToast();
-
-  // Load generated images from localStorage
-  useEffect(() => {
-    try {
-      const savedImages = localStorage.getItem('generatedImages');
-      if (savedImages) {
-        setGeneratedImages(JSON.parse(savedImages));
-      }
-    } catch (e) {
-      console.error('Failed to load generated images:', e);
-    }
-  }, []);
 
   // Load voice history from localStorage
   useEffect(() => {
@@ -152,7 +136,6 @@ const VideoGenerator = () => {
           <ImageSourceSelector
             slides={slides}
             onSlidesChange={setSlides}
-            generatedImages={generatedImages}
           />
 
           <AudioSourceSelector
