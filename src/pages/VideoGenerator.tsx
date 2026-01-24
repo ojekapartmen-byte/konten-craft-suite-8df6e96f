@@ -2,14 +2,18 @@ import { useState, useEffect } from "react";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { GenerateButton } from "@/components/ui/GenerateButton";
-import { Video } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Video, Save, FolderOpen } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { SlideImage, AudioTrack, TransitionType } from "@/types/videoGenerator";
 import { ImageSourceSelector } from "@/components/video-generator/ImageSourceSelector";
 import { AudioSourceSelector } from "@/components/video-generator/AudioSourceSelector";
 import { TransitionSelector } from "@/components/video-generator/TransitionSelector";
 import { SlideshowPreview } from "@/components/video-generator/SlideshowPreview";
+import { VideoProjectGallery } from "@/components/video-generator/VideoProjectGallery";
 import { renderVideo, downloadBlob } from "@/lib/videoRenderer";
+import { useVideoProjects, VideoProject } from "@/hooks/useVideoProjects";
 
 interface VoiceHistoryItem {
   id: string;
@@ -28,7 +32,18 @@ const VideoGenerator = () => {
   const [isRendering, setIsRendering] = useState(false);
   const [renderProgress, setRenderProgress] = useState(0);
   const [voiceHistory, setVoiceHistory] = useState<VoiceHistoryItem[]>([]);
+  const [projectTitle, setProjectTitle] = useState("Untitled Video");
+  const [editingProjectId, setEditingProjectId] = useState<string | null>(null);
   const { toast } = useToast();
+  
+  const { 
+    projects, 
+    isLoading: isLoadingProjects, 
+    saveProject, 
+    updateProject, 
+    deleteProject, 
+    toggleFavorite 
+  } = useVideoProjects();
 
   // Load voice history from localStorage
   useEffect(() => {
@@ -76,6 +91,78 @@ const VideoGenerator = () => {
     }
   };
 
+  const handleSaveProject = async () => {
+    if (slides.length === 0) {
+      toast({
+        title: "Tidak ada slides",
+        description: "Tambahkan minimal satu gambar untuk menyimpan project",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const totalDuration = slides.reduce((acc, s) => acc + s.duration, 0);
+    const thumbnailUrl = slides[0]?.src;
+
+    if (editingProjectId) {
+      // Update existing project
+      const success = await updateProject(editingProjectId, {
+        title: projectTitle,
+        slides,
+        audio,
+        transition,
+        totalDuration,
+        thumbnailUrl,
+        status: isGenerated ? 'completed' : 'draft',
+      });
+      
+      if (success) {
+        toast({
+          title: "Project diupdate!",
+          description: "Perubahan berhasil disimpan",
+        });
+      }
+    } else {
+      // Save new project
+      const savedProject = await saveProject({
+        title: projectTitle,
+        slides,
+        audio,
+        transition,
+        totalDuration,
+        thumbnailUrl,
+        status: isGenerated ? 'completed' : 'draft',
+      });
+
+      if (savedProject) {
+        setEditingProjectId(savedProject.id);
+      }
+    }
+  };
+
+  const handleLoadProject = (project: VideoProject) => {
+    setSlides(project.slides);
+    setAudio(project.audio);
+    setTransition(project.transition);
+    setProjectTitle(project.title);
+    setEditingProjectId(project.id);
+    setIsGenerated(project.status === 'completed');
+    
+    toast({
+      title: "Project dimuat",
+      description: `"${project.title}" siap untuk diedit`,
+    });
+  };
+
+  const handleNewProject = () => {
+    setSlides([]);
+    setAudio(null);
+    setTransition('fade');
+    setProjectTitle("Untitled Video");
+    setEditingProjectId(null);
+    setIsGenerated(false);
+  };
+
   const handleDownload = async () => {
     if (slides.length === 0) return;
 
@@ -107,6 +194,11 @@ const VideoGenerator = () => {
         title: "Video downloaded!",
         description: `Your ${extension.toUpperCase()} video has been saved.`,
       });
+
+      // Update project status to completed if editing
+      if (editingProjectId) {
+        await updateProject(editingProjectId, { status: 'completed' });
+      }
     } catch (error) {
       console.error('Video rendering error:', error);
       toast({
@@ -130,24 +222,65 @@ const VideoGenerator = () => {
         description="Create slideshow videos by combining images and audio"
       />
 
-      <div className="grid gap-8 lg:grid-cols-2">
+      <div className="grid gap-8 lg:grid-cols-3">
         {/* Input Section */}
-        <div className="space-y-6 animate-fade-in" style={{ animationDelay: "0.1s" }}>
-          <ImageSourceSelector
-            slides={slides}
-            onSlidesChange={setSlides}
-          />
+        <div className="lg:col-span-2 space-y-6 animate-fade-in" style={{ animationDelay: "0.1s" }}>
+          {/* Project Title & Actions */}
+          <div className="glass-card rounded-xl p-4">
+            <div className="flex flex-col sm:flex-row gap-3">
+              <div className="flex-1">
+                <Input
+                  value={projectTitle}
+                  onChange={(e) => setProjectTitle(e.target.value)}
+                  placeholder="Nama project..."
+                  className="text-lg font-medium"
+                />
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  onClick={handleNewProject}
+                  className="gap-2"
+                >
+                  <FolderOpen className="h-4 w-4" />
+                  Baru
+                </Button>
+                <Button
+                  onClick={handleSaveProject}
+                  disabled={slides.length === 0}
+                  className="gap-2"
+                >
+                  <Save className="h-4 w-4" />
+                  {editingProjectId ? 'Update' : 'Simpan'}
+                </Button>
+              </div>
+            </div>
+            {editingProjectId && (
+              <p className="text-xs text-muted-foreground mt-2">
+                Mengedit project yang sudah ada
+              </p>
+            )}
+          </div>
 
-          <AudioSourceSelector
-            audio={audio}
-            onAudioChange={setAudio}
-            voiceHistory={voiceHistory}
-          />
+          <div className="grid gap-6 md:grid-cols-2">
+            <ImageSourceSelector
+              slides={slides}
+              onSlidesChange={setSlides}
+            />
 
-          <TransitionSelector
-            transition={transition}
-            onTransitionChange={setTransition}
-          />
+            <div className="space-y-6">
+              <AudioSourceSelector
+                audio={audio}
+                onAudioChange={setAudio}
+                voiceHistory={voiceHistory}
+              />
+
+              <TransitionSelector
+                transition={transition}
+                onTransitionChange={setTransition}
+              />
+            </div>
+          </div>
 
           <GenerateButton
             onClick={handleGenerate}
@@ -157,10 +290,7 @@ const VideoGenerator = () => {
           >
             {isLoading ? 'Creating Video...' : `Create Video (${totalDuration}s)`}
           </GenerateButton>
-        </div>
 
-        {/* Output Section */}
-        <div className="animate-fade-in" style={{ animationDelay: "0.2s" }}>
           <SlideshowPreview
             slides={slides}
             audio={audio}
@@ -170,6 +300,18 @@ const VideoGenerator = () => {
             renderProgress={renderProgress}
             onDownload={handleDownload}
             isRendering={isRendering}
+          />
+        </div>
+
+        {/* Project Gallery Section */}
+        <div className="animate-fade-in" style={{ animationDelay: "0.2s" }}>
+          <VideoProjectGallery
+            projects={projects}
+            isLoading={isLoadingProjects}
+            onDelete={deleteProject}
+            onUpdate={updateProject}
+            onToggleFavorite={toggleFavorite}
+            onLoadProject={handleLoadProject}
           />
         </div>
       </div>

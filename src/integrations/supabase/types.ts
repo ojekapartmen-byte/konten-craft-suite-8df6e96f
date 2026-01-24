@@ -107,6 +107,51 @@ export type Database = {
         }
         Relationships: []
       }
+      video_projects: {
+        Row: {
+          audio: Json | null
+          created_at: string
+          id: string
+          is_favorite: boolean
+          slides: Json
+          status: string
+          thumbnail_url: string | null
+          title: string
+          total_duration: number
+          transition: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          audio?: Json | null
+          created_at?: string
+          id?: string
+          is_favorite?: boolean
+          slides?: Json
+          status?: string
+          thumbnail_url?: string | null
+          title?: string
+          total_duration?: number
+          transition?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          audio?: Json | null
+          created_at?: string
+          id?: string
+          is_favorite?: boolean
+          slides?: Json
+          status?: string
+          thumbnail_url?: string | null
+          title?: string
+          total_duration?: number
+          transition?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
