@@ -8,6 +8,7 @@ import TextGenerator from "./pages/TextGenerator";
 import VoiceDubbing from "./pages/VoiceDubbing";
 import ImageGenerator from "./pages/ImageGenerator";
 import VideoGenerator from "./pages/VideoGenerator";
+import VideoEditor from "./pages/VideoEditor";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -24,6 +25,7 @@ const App = () => (
           <Route path="/voice" element={<VoiceDubbing />} />
           <Route path="/image" element={<ImageGenerator />} />
           <Route path="/video" element={<VideoGenerator />} />
+          <Route path="/edit-video" element={<VideoEditor />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

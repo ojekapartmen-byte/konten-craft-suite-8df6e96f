@@ -6,6 +6,7 @@ import {
   Mic2,
   ImageIcon,
   Video,
+  Film,
   Sparkles,
 } from "lucide-react";
 
@@ -15,6 +16,7 @@ const navItems = [
   { icon: Mic2, label: "Voice Dubbing", path: "/voice" },
   { icon: ImageIcon, label: "Image Generator", path: "/image" },
   { icon: Video, label: "Video Generator", path: "/video" },
+  { icon: Film, label: "Edit Video", path: "/edit-video" },
 ];
 
 export const Sidebar = () => {
