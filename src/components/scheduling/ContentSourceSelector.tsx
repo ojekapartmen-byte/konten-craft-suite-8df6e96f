@@ -46,84 +46,101 @@ export const ContentSourceSelector = ({ onSelect, selectedId }: ContentSourceSel
     if (!user) return;
     setIsLoading(true);
 
-    try {
-      // Fetch text content (content_drafts)
-      const { data: drafts } = await supabase
-        .from("content_drafts")
-        .select("*")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false })
-        .limit(20);
+    // Fetch each content type independently to avoid one failure blocking others
+    const fetchDrafts = async () => {
+      try {
+        const { data: drafts, error } = await supabase
+          .from("content_drafts")
+          .select("id, title, content, created_at")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false })
+          .limit(20);
 
-      if (drafts) {
-        setTextContents(
-          drafts.map((d) => {
-            const content = d.content as { mainScript?: string; caption?: string };
-            return {
-              id: d.id,
-              title: d.title,
-              type: "text" as const,
-              preview: content?.mainScript?.slice(0, 100) || "No preview",
-              createdAt: new Date(d.created_at),
+        if (error) throw error;
+        if (drafts) {
+          setTextContents(
+            drafts.map((d) => {
+              const content = d.content as { mainScript?: string; caption?: string };
+              return {
+                id: d.id,
+                title: d.title,
+                type: "text" as const,
+                preview: content?.mainScript?.slice(0, 100) || "No preview",
+                createdAt: new Date(d.created_at),
+                metadata: {
+                  caption: content?.caption,
+                },
+              };
+            })
+          );
+        }
+      } catch (error) {
+        console.error("Error fetching drafts:", error);
+      }
+    };
+
+    const fetchImages = async () => {
+      try {
+        const { data: images, error } = await supabase
+          .from("generated_images")
+          .select("id, title, prompt, image_url, thumbnail_url, created_at")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false })
+          .limit(20);
+
+        if (error) throw error;
+        if (images) {
+          setImageContents(
+            images.map((img) => ({
+              id: img.id,
+              title: img.title || "Untitled Image",
+              type: "image" as const,
+              preview: img.prompt.slice(0, 100),
+              createdAt: new Date(img.created_at),
               metadata: {
-                caption: content?.caption,
+                imageUrl: img.image_url,
+                thumbnailUrl: img.thumbnail_url || img.image_url,
               },
-            };
-          })
-        );
+            }))
+          );
+        }
+      } catch (error) {
+        console.error("Error fetching images:", error);
       }
+    };
 
-      // Fetch images (generated_images)
-      const { data: images } = await supabase
-        .from("generated_images")
-        .select("*")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false })
-        .limit(20);
+    const fetchVideos = async () => {
+      try {
+        const { data: videos, error } = await supabase
+          .from("video_projects")
+          .select("id, title, slides, total_duration, thumbnail_url, created_at")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false })
+          .limit(20);
 
-      if (images) {
-        setImageContents(
-          images.map((img) => ({
-            id: img.id,
-            title: img.title || "Untitled Image",
-            type: "image" as const,
-            preview: img.prompt.slice(0, 100),
-            createdAt: new Date(img.created_at),
-            metadata: {
-              imageUrl: img.image_url,
-              thumbnailUrl: img.thumbnail_url || img.image_url,
-            },
-          }))
-        );
+        if (error) throw error;
+        if (videos) {
+          setVideoContents(
+            videos.map((vid) => ({
+              id: vid.id,
+              title: vid.title,
+              type: "video" as const,
+              preview: `${(vid.slides as unknown[])?.length || 0} slides, ${vid.total_duration}s`,
+              createdAt: new Date(vid.created_at),
+              metadata: {
+                thumbnailUrl: vid.thumbnail_url || undefined,
+              },
+            }))
+          );
+        }
+      } catch (error) {
+        console.error("Error fetching videos:", error);
       }
+    };
 
-      // Fetch videos (video_projects)
-      const { data: videos } = await supabase
-        .from("video_projects")
-        .select("*")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false })
-        .limit(20);
-
-      if (videos) {
-        setVideoContents(
-          videos.map((vid) => ({
-            id: vid.id,
-            title: vid.title,
-            type: "video" as const,
-            preview: `${(vid.slides as unknown[])?.length || 0} slides, ${vid.total_duration}s`,
-            createdAt: new Date(vid.created_at),
-            metadata: {
-              thumbnailUrl: vid.thumbnail_url || undefined,
-            },
-          }))
-        );
-      }
-    } catch (error) {
-      console.error("Error fetching content:", error);
-    } finally {
-      setIsLoading(false);
-    }
+    // Run all fetches in parallel - each handles its own errors
+    await Promise.all([fetchDrafts(), fetchImages(), fetchVideos()]);
+    setIsLoading(false);
   };
 
   const renderContentList = (items: ContentItem[], emptyMessage: string) => {
