@@ -12,6 +12,7 @@ import ImageGenerator from "./pages/ImageGenerator";
 import VideoGenerator from "./pages/VideoGenerator";
 import VideoEditor from "./pages/VideoEditor";
 import Auth from "./pages/Auth";
+import ContentScheduling from "./pages/ContentScheduling";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -31,6 +32,7 @@ const App = () => (
             <Route path="/image" element={<ProtectedRoute><ImageGenerator /></ProtectedRoute>} />
             <Route path="/video" element={<ProtectedRoute><VideoGenerator /></ProtectedRoute>} />
             <Route path="/edit-video" element={<ProtectedRoute><VideoEditor /></ProtectedRoute>} />
+            <Route path="/scheduling" element={<ProtectedRoute><ContentScheduling /></ProtectedRoute>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

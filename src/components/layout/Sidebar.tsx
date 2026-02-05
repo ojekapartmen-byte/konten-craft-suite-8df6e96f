@@ -7,6 +7,7 @@ import {
   ImageIcon,
   Video,
   Film,
+  CalendarClock,
   Sparkles,
 } from "lucide-react";
 import { UserMenu } from "./UserMenu";
@@ -18,6 +19,7 @@ const navItems = [
   { icon: ImageIcon, label: "Image Generator", path: "/image" },
   { icon: Video, label: "Video Generator", path: "/video" },
   { icon: Film, label: "Edit Video", path: "/edit-video" },
+  { icon: CalendarClock, label: "Scheduling", path: "/scheduling" },
 ];
 
 export const Sidebar = () => {
