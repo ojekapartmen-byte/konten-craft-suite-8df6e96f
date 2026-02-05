@@ -107,6 +107,69 @@ export type Database = {
         }
         Relationships: []
       }
+      scheduled_content: {
+        Row: {
+          caption: string | null
+          created_at: string
+          email_address: string | null
+          hashtags: string[] | null
+          id: string
+          notes: string | null
+          notification_email: boolean | null
+          notification_whatsapp: boolean | null
+          platform: string
+          reminder_sent_at: string | null
+          scheduled_at: string
+          status: string
+          thumbnail_url: string | null
+          title: string
+          updated_at: string
+          user_id: string
+          video_url: string | null
+          whatsapp_number: string | null
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string
+          email_address?: string | null
+          hashtags?: string[] | null
+          id?: string
+          notes?: string | null
+          notification_email?: boolean | null
+          notification_whatsapp?: boolean | null
+          platform: string
+          reminder_sent_at?: string | null
+          scheduled_at: string
+          status?: string
+          thumbnail_url?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+          video_url?: string | null
+          whatsapp_number?: string | null
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string
+          email_address?: string | null
+          hashtags?: string[] | null
+          id?: string
+          notes?: string | null
+          notification_email?: boolean | null
+          notification_whatsapp?: boolean | null
+          platform?: string
+          reminder_sent_at?: string | null
+          scheduled_at?: string
+          status?: string
+          thumbnail_url?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+          video_url?: string | null
+          whatsapp_number?: string | null
+        }
+        Relationships: []
+      }
       video_projects: {
         Row: {
           aspect_ratio: string
