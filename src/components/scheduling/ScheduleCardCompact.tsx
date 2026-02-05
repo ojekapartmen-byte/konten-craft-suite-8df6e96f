@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import { format, isPast } from "date-fns";
 import { Clock, MoreVertical, Bell, CheckCircle, Trash2, Copy, Download } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -25,6 +26,7 @@ export const ScheduleCardCompact = ({
   onSendReminder,
   onDelete,
 }: ScheduleCardCompactProps) => {
+  const navigate = useNavigate();
   const { toast } = useToast();
   const platform = PLATFORMS.find((p) => p.value === schedule.platform);
   const scheduledDate = new Date(schedule.scheduled_at);
@@ -47,9 +49,14 @@ export const ScheduleCardCompact = ({
     return "border-l-primary";
   };
 
+  const handleCardClick = () => {
+    navigate(`/scheduling/${schedule.id}`);
+  };
+
   return (
     <Card
-      className={`overflow-hidden border-l-4 ${getStatusColor()} transition-all hover:shadow-md group`}
+      onClick={handleCardClick}
+      className={`overflow-hidden border-l-4 ${getStatusColor()} transition-all hover:shadow-md group cursor-pointer`}
     >
       <CardContent className="p-3">
         {/* Thumbnail */}

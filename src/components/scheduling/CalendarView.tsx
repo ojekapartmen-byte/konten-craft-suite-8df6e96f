@@ -1,15 +1,11 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { format, isSameDay, startOfMonth, endOfMonth, eachDayOfInterval, startOfWeek, endOfWeek, isToday, isSameMonth } from "date-fns";
 import { id as localeId } from "date-fns/locale";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { ScheduledContent, PLATFORMS } from "@/types/scheduling";
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "@/components/ui/hover-card";
 import { Badge } from "@/components/ui/badge";
 
 interface CalendarViewProps {
@@ -25,6 +21,7 @@ export const CalendarView = ({
   onSendReminder,
   onDelete,
 }: CalendarViewProps) => {
+  const navigate = useNavigate();
   const [currentMonth, setCurrentMonth] = useState(new Date());
 
   const monthStart = startOfMonth(currentMonth);
@@ -126,73 +123,17 @@ export const CalendarView = ({
                   {daySchedules.slice(0, 3).map((schedule) => {
                     const platformInfo = getPlatformInfo(schedule.platform);
                     return (
-                      <HoverCard key={schedule.id} openDelay={200}>
-                        <HoverCardTrigger asChild>
-                          <div
-                            className={cn(
-                              "text-xs p-1 rounded cursor-pointer truncate",
-                              getStatusColor(schedule.status, schedule.scheduled_at)
-                            )}
-                          >
-                            <span className="mr-1">{platformInfo.icon}</span>
-                            {schedule.title}
-                          </div>
-                        </HoverCardTrigger>
-                        <HoverCardContent className="w-72" align="start">
-                          <div className="space-y-2">
-                            <div className="flex items-center gap-2">
-                              <span className="text-lg">{platformInfo.icon}</span>
-                              <div>
-                                <h4 className="font-semibold">{schedule.title}</h4>
-                                <p className="text-xs text-muted-foreground">
-                                  {platformInfo.label}
-                                </p>
-                              </div>
-                            </div>
-                            <p className="text-sm text-muted-foreground">
-                              {format(new Date(schedule.scheduled_at), "dd MMM yyyy, HH:mm", {
-                                locale: localeId,
-                              })}
-                            </p>
-                            {schedule.caption && (
-                              <p className="text-sm line-clamp-2">{schedule.caption}</p>
-                            )}
-                            <div className="flex items-center gap-2">
-                              <Badge
-                                variant={schedule.status === "posted" ? "default" : "secondary"}
-                              >
-                                {schedule.status === "posted" ? "Sudah Diposting" : "Dijadwalkan"}
-                              </Badge>
-                            </div>
-                            <div className="flex gap-2 pt-2 border-t">
-                              {schedule.status !== "posted" && (
-                                <>
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={() => onSendReminder(schedule.id)}
-                                  >
-                                    Reminder
-                                  </Button>
-                                  <Button
-                                    size="sm"
-                                    onClick={() => onMarkPosted(schedule.id)}
-                                  >
-                                    Tandai Posted
-                                  </Button>
-                                </>
-                              )}
-                              <Button
-                                size="sm"
-                                variant="destructive"
-                                onClick={() => onDelete(schedule.id)}
-                              >
-                                Hapus
-                              </Button>
-                            </div>
-                          </div>
-                        </HoverCardContent>
-                      </HoverCard>
+                      <div
+                        key={schedule.id}
+                        onClick={() => navigate(`/scheduling/${schedule.id}`)}
+                        className={cn(
+                          "text-xs p-1 rounded cursor-pointer truncate hover:ring-1 hover:ring-primary/50 transition-all",
+                          getStatusColor(schedule.status, schedule.scheduled_at)
+                        )}
+                      >
+                        <span className="mr-1">{platformInfo.icon}</span>
+                        {schedule.title}
+                      </div>
                     );
                   })}
                   {daySchedules.length > 3 && (

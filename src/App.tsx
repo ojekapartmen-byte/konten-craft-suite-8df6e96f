@@ -14,6 +14,7 @@ import VideoEditor from "./pages/VideoEditor";
 import Auth from "./pages/Auth";
 import ContentScheduling from "./pages/ContentScheduling";
 import CreateSchedule from "./pages/CreateSchedule";
+import ScheduleDetail from "./pages/ScheduleDetail";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -35,6 +36,7 @@ const App = () => (
             <Route path="/edit-video" element={<ProtectedRoute><VideoEditor /></ProtectedRoute>} />
             <Route path="/scheduling" element={<ProtectedRoute><ContentScheduling /></ProtectedRoute>} />
             <Route path="/scheduling/create" element={<ProtectedRoute><CreateSchedule /></ProtectedRoute>} />
+            <Route path="/scheduling/:id" element={<ProtectedRoute><ScheduleDetail /></ProtectedRoute>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
