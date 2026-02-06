@@ -75,54 +75,74 @@ export const ScheduleForm = ({ onSubmit, initialData, isEditing }: ScheduleFormP
     }));
   };
 
-  const handleGenerateCaption = async () => {
-    if (!selectedContent) {
-      toast({
-        title: "Pilih konten dulu",
-        description: "Pilih konten dari menu lain sebelum generate caption",
-        variant: "destructive",
-      });
-      return;
-    }
+const handleGenerateCaption = async () => {
+  const hasAnyContent =
+    selectedContent ||
+    formData.image_url ||
+    formData.video_url ||
+    formData.title.trim().length > 0;
 
-    setIsGeneratingCaption(true);
-    try {
-      const { data, error } = await supabase.functions.invoke("generate-caption", {
+  if (!hasAnyContent) {
+    toast({
+      title: "Konten belum ada",
+      description: "Isi judul, upload media, atau pilih konten sebelum generate AI",
+      variant: "destructive",
+    });
+    return;
+  }
+
+  setIsGeneratingCaption(true);
+
+  try {
+    const contentType =
+      selectedContent?.type ||
+      (formData.video_url ? "video" : "image");
+
+    const { data, error } = await supabase.functions.invoke(
+      "generate-caption",
+      {
         body: {
           platform: formData.platform,
-          contentType: selectedContent.type,
-          contentTitle: selectedContent.title,
-          contentPreview: selectedContent.preview,
+          contentType,
+          contentTitle:
+            selectedContent?.title || formData.title || "Konten Sosial Media",
+          contentPreview:
+            selectedContent?.preview ||
+            formData.image_url ||
+            formData.video_url,
           includeHashtags: true,
           tone: "santai",
         },
-      });
-
-      if (error) throw error;
-
-      if (data.caption) {
-        setFormData(prev => ({
-          ...prev,
-          caption: data.caption,
-          hashtags: data.hashtags || prev.hashtags,
-        }));
-
-        toast({
-          title: "Caption berhasil digenerate!",
-          description: "Caption dan hashtag sudah diisi otomatis",
-        });
       }
-    } catch (error) {
-      console.error("Error generating caption:", error);
+    );
+
+    if (error) throw error;
+
+    if (data?.caption) {
+      setFormData((prev) => ({
+        ...prev,
+        caption: data.caption,
+        hashtags: data.hashtags || prev.hashtags,
+      }));
+
       toast({
-        title: "Gagal generate caption",
-        description: error instanceof Error ? error.message : "Terjadi kesalahan",
-        variant: "destructive",
+        title: "Caption berhasil digenerate ✨",
+        description: "Caption & hashtag diisi otomatis oleh AI",
       });
-    } finally {
-      setIsGeneratingCaption(false);
     }
-  };
+  } catch (error) {
+    console.error("Error generating caption:", error);
+    toast({
+      title: "Gagal generate caption",
+      description:
+        error instanceof Error ? error.message : "Terjadi kesalahan",
+      variant: "destructive",
+    });
+  } finally {
+    setIsGeneratingCaption(false);
+  }
+};
+
 
   const addHashtag = () => {
     if (hashtagInput.trim()) {
