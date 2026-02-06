@@ -114,6 +114,7 @@ export type Database = {
           email_address: string | null
           hashtags: string[] | null
           id: string
+          image_url: string | null
           notes: string | null
           notification_email: boolean | null
           notification_whatsapp: boolean | null
@@ -134,6 +135,7 @@ export type Database = {
           email_address?: string | null
           hashtags?: string[] | null
           id?: string
+          image_url?: string | null
           notes?: string | null
           notification_email?: boolean | null
           notification_whatsapp?: boolean | null
@@ -154,6 +156,7 @@ export type Database = {
           email_address?: string | null
           hashtags?: string[] | null
           id?: string
+          image_url?: string | null
           notes?: string | null
           notification_email?: boolean | null
           notification_whatsapp?: boolean | null

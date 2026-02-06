@@ -10,6 +10,7 @@ export interface ScheduledContent {
   status: ScheduleStatus;
   caption: string | null;
   hashtags: string[] | null;
+  image_url: string | null;
   video_url: string | null;
   thumbnail_url: string | null;
   notification_email: boolean;
@@ -28,6 +29,7 @@ export interface CreateScheduledContent {
   scheduled_at: string;
   caption?: string;
   hashtags?: string[];
+  image_url?: string;
   video_url?: string;
   thumbnail_url?: string;
   notification_email?: boolean;

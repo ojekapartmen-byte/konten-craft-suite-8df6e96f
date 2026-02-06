@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { format } from "date-fns";
-import { Calendar, Clock, Mail, MessageSquare, Video, FileText, Hash, Sparkles, Loader2 } from "lucide-react";
+import { Calendar, Clock, Mail, MessageSquare, FileText, Hash, Sparkles, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,6 +17,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CreateScheduledContent, PLATFORMS, Platform } from "@/types/scheduling";
 import { useAuth } from "@/contexts/AuthContext";
 import { ContentSourceSelector, ContentItem } from "./ContentSourceSelector";
+import { MediaUploadSection } from "./MediaUploadSection";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -38,6 +39,7 @@ export const ScheduleForm = ({ onSubmit, initialData, isEditing }: ScheduleFormP
     scheduled_at: initialData?.scheduled_at || format(new Date(), "yyyy-MM-dd'T'HH:mm"),
     caption: initialData?.caption || "",
     hashtags: initialData?.hashtags || [],
+    image_url: initialData?.image_url || "",
     video_url: initialData?.video_url || "",
     thumbnail_url: initialData?.thumbnail_url || "",
     notification_email: initialData?.notification_email ?? true,
@@ -206,20 +208,27 @@ export const ScheduleForm = ({ onSubmit, initialData, isEditing }: ScheduleFormP
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="video_url">URL Video (opsional)</Label>
-            <div className="relative">
-              <Video className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                id="video_url"
-                placeholder="https://example.com/video.mp4"
-                className="pl-10"
-                value={formData.video_url}
-                onChange={(e) => setFormData(prev => ({ ...prev, video_url: e.target.value }))}
-              />
-            </div>
-          </div>
+        </CardContent>
+      </Card>
 
+      {/* Media Upload Section */}
+      <MediaUploadSection
+        imageUrl={formData.image_url || ""}
+        videoUrl={formData.video_url || ""}
+        thumbnailUrl={formData.thumbnail_url || ""}
+        onImageUrlChange={(url) => setFormData(prev => ({ ...prev, image_url: url }))}
+        onVideoUrlChange={(url) => setFormData(prev => ({ ...prev, video_url: url }))}
+        onThumbnailUrlChange={(url) => setFormData(prev => ({ ...prev, thumbnail_url: url }))}
+      />
+
+      <Card className="glass-card">
+        <CardHeader>
+          <CardTitle className="text-lg flex items-center gap-2">
+            <Hash className="h-5 w-5 text-primary" />
+            Caption & Hashtag
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <Label htmlFor="caption">Caption</Label>

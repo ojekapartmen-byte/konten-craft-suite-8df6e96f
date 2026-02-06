@@ -192,23 +192,23 @@ const ScheduleDetail = () => {
             </Card>
 
             {/* Media Preview */}
-            {(schedule.video_url || schedule.thumbnail_url) && (
+            {(schedule.image_url || schedule.video_url || schedule.thumbnail_url) && (
               <Card>
                 <CardHeader>
                   <CardTitle className="text-base">Media</CardTitle>
                 </CardHeader>
-                <CardContent>
-                  {schedule.thumbnail_url && (
+                <CardContent className="space-y-4">
+                  {(schedule.image_url || schedule.thumbnail_url) && (
                     <div className="rounded-lg overflow-hidden bg-muted aspect-video">
                       <img
-                        src={schedule.thumbnail_url}
+                        src={schedule.image_url || schedule.thumbnail_url!}
                         alt={schedule.title}
                         className="w-full h-full object-cover"
                       />
                     </div>
                   )}
                   {schedule.video_url && (
-                    <div className="flex gap-2 mt-4">
+                    <div className="flex gap-2">
                       <Button onClick={downloadVideo} className="flex-1">
                         <Download className="h-4 w-4 mr-2" />
                         Download Video

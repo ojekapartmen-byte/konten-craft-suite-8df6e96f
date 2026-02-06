@@ -13,6 +13,7 @@ interface ScheduledContentRow {
   status: string;
   caption: string | null;
   hashtags: string[] | null;
+  image_url: string | null;
   video_url: string | null;
   thumbnail_url: string | null;
   notification_email: boolean;
