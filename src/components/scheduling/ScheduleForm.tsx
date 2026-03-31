@@ -267,12 +267,11 @@ const handleGenerateCaption = async () => {
                 Auto Generate AI
               </Button>
             </div>
-            <Textarea
-              id="caption"
+            <EditableField
+              value={formData.caption || ""}
+              onChange={(val) => setFormData(prev => ({ ...prev, caption: val }))}
+              multiline
               placeholder="Tulis caption untuk konten atau generate dengan AI..."
-              rows={4}
-              value={formData.caption}
-              onChange={(e) => setFormData(prev => ({ ...prev, caption: e.target.value }))}
             />
           </div>
 
