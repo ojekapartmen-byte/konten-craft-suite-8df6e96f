@@ -170,12 +170,12 @@ const ImageGenerator = () => {
                 <Label htmlFor="prompt" className="text-sm font-medium text-foreground">
                   Image Description
                 </Label>
-                <Textarea
-                  id="prompt"
-                  placeholder="E.g., A serene mountain landscape at sunset with a calm lake reflection, cinematic lighting..."
+                <EditableField
                   value={prompt}
-                  onChange={(e) => setPrompt(e.target.value)}
-                  className="mt-2 min-h-[120px] resize-none border-border bg-secondary/50 text-foreground placeholder:text-muted-foreground focus:border-primary"
+                  onChange={setPrompt}
+                  multiline
+                  placeholder="E.g., A serene mountain landscape at sunset with a calm lake reflection, cinematic lighting..."
+                  className="mt-2"
                 />
               </div>
 

@@ -51,11 +51,12 @@ export const TemplateFields = ({ fields, values, onChange }: TemplateFieldsProps
           )}
           
           {field.type === 'textarea' && (
-            <Textarea
+            <EditableField
               value={(values[field.id] as string) || ''}
-              onChange={(e) => onChange(field.id, e.target.value)}
+              onChange={(val) => onChange(field.id, val)}
+              multiline
               placeholder={field.placeholder}
-              className="mt-1.5 min-h-[80px]"
+              className="mt-1.5"
             />
           )}
           

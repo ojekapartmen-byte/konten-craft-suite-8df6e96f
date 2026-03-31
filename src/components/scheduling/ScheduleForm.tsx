@@ -310,12 +310,11 @@ const handleGenerateCaption = async () => {
 
           <div className="space-y-2">
             <Label htmlFor="notes">Catatan (opsional)</Label>
-            <Textarea
-              id="notes"
+            <EditableField
+              value={formData.notes || ""}
+              onChange={(val) => setFormData(prev => ({ ...prev, notes: val }))}
+              multiline
               placeholder="Catatan tambahan..."
-              rows={2}
-              value={formData.notes}
-              onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
             />
           </div>
         </CardContent>
