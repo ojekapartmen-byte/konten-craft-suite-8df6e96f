@@ -1,3 +1,4 @@
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { format, isPast, isToday, isTomorrow } from "date-fns";
 import { id as localeId } from "date-fns/locale";
@@ -13,7 +14,7 @@ import {
   ExternalLink,
   Mail,
   MessageCircle,
-  Edit,
+  Save,
 } from "lucide-react";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { Button } from "@/components/ui/button";
@@ -23,6 +24,7 @@ import { Separator } from "@/components/ui/separator";
 import { useScheduledContent } from "@/hooks/useScheduledContent";
 import { useToast } from "@/hooks/use-toast";
 import { PLATFORMS } from "@/types/scheduling";
+import { EditableField } from "@/components/scheduling/EditableField";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -39,9 +41,38 @@ const ScheduleDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { schedules, markAsPosted, sendReminder, deleteSchedule } = useScheduledContent();
+  const { schedules, updateSchedule, markAsPosted, sendReminder, deleteSchedule } =
+    useScheduledContent();
 
   const schedule = schedules.find((s) => s.id === id);
+
+  // Editable local state
+  const [editTitle, setEditTitle] = useState("");
+  const [editCaption, setEditCaption] = useState("");
+  const [editNotes, setEditNotes] = useState("");
+  const [editHashtags, setEditHashtags] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Sync from schedule to local state
+  useEffect(() => {
+    if (schedule) {
+      setEditTitle(schedule.title);
+      setEditCaption(schedule.caption || "");
+      setEditNotes(schedule.notes || "");
+      setEditHashtags(schedule.hashtags?.join(" ") || "");
+    }
+  }, [schedule]);
+
+  // Detect unsaved changes
+  const hasChanges = useMemo(() => {
+    if (!schedule) return false;
+    return (
+      editTitle !== schedule.title ||
+      editCaption !== (schedule.caption || "") ||
+      editNotes !== (schedule.notes || "") ||
+      editHashtags !== (schedule.hashtags?.join(" ") || "")
+    );
+  }, [schedule, editTitle, editCaption, editNotes, editHashtags]);
 
   if (!schedule) {
     return (
@@ -60,7 +91,6 @@ const ScheduleDetail = () => {
   const platform = PLATFORMS.find((p) => p.value === schedule.platform);
   const scheduledDate = new Date(schedule.scheduled_at);
   const isOverdue = isPast(scheduledDate) && schedule.status === "scheduled";
-  const isPosted = schedule.status === "posted";
 
   const getDateLabel = () => {
     if (isToday(scheduledDate)) return "Hari ini";
@@ -85,11 +115,32 @@ const ScheduleDetail = () => {
     }
   };
 
+  const handleSave = async () => {
+    setIsSaving(true);
+    const hashtagsArray = editHashtags
+      .split(/[\s,]+/)
+      .map((t) => t.trim())
+      .filter((t) => t.length > 0)
+      .map((t) => (t.startsWith("#") ? t : `#${t}`));
+
+    const success = await updateSchedule(schedule.id, {
+      title: editTitle,
+      caption: editCaption || undefined,
+      notes: editNotes || undefined,
+      hashtags: hashtagsArray.length > 0 ? hashtagsArray : undefined,
+    });
+
+    setIsSaving(false);
+    if (success) {
+      toast({ title: "Perubahan berhasil disimpan! ✅" });
+    }
+  };
+
   const copyCaption = () => {
-    if (schedule.caption) {
-      const fullCaption = schedule.hashtags?.length
-        ? `${schedule.caption}\n\n${schedule.hashtags.join(" ")}`
-        : schedule.caption;
+    const fullCaption = editHashtags
+      ? `${editCaption}\n\n${editHashtags}`
+      : editCaption;
+    if (fullCaption) {
       navigator.clipboard.writeText(fullCaption);
       toast({ title: "Caption disalin ke clipboard!" });
     }
@@ -132,15 +183,16 @@ const ScheduleDetail = () => {
             Kembali
           </Button>
           <div className="flex items-center gap-2">
-            <Button variant="outline" onClick={() => navigate(`/scheduling/edit/${schedule.id}`)}>
-              <Edit className="h-4 w-4 mr-2" />
-              Edit
-            </Button>
+            {hasChanges && (
+              <Button onClick={handleSave} disabled={isSaving} className="animate-pulse">
+                <Save className="h-4 w-4 mr-2" />
+                {isSaving ? "Menyimpan..." : "Simpan Perubahan"}
+              </Button>
+            )}
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button variant="destructive">
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Hapus
+                <Button variant="destructive" size="icon">
+                  <Trash2 className="h-4 w-4" />
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
@@ -169,8 +221,13 @@ const ScheduleDetail = () => {
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
                     <span className="text-4xl">{platform?.icon}</span>
-                    <div>
-                      <CardTitle className="text-xl">{schedule.title}</CardTitle>
+                    <div className="flex-1">
+                      <EditableField
+                        value={editTitle}
+                        onChange={setEditTitle}
+                        placeholder="Judul konten..."
+                        displayClassName="text-xl font-semibold"
+                      />
                       <p className="text-sm text-muted-foreground mt-1">{platform?.label}</p>
                     </div>
                   </div>
@@ -226,48 +283,69 @@ const ScheduleDetail = () => {
               </Card>
             )}
 
-            {/* Caption */}
-            {schedule.caption && (
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between pb-3">
-                  <CardTitle className="text-base">Caption</CardTitle>
-                  <Button variant="ghost" size="sm" onClick={copyCaption}>
-                    <Copy className="h-4 w-4 mr-2" />
-                    Salin
-                  </Button>
-                </CardHeader>
-                <CardContent>
-                  <p className="whitespace-pre-wrap text-sm">{schedule.caption}</p>
-                  {schedule.hashtags && schedule.hashtags.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mt-4">
-                      {schedule.hashtags.map((tag, i) => (
-                        <span key={i} className="text-sm text-primary">
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            )}
+            {/* Caption - Always shown, editable */}
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between pb-3">
+                <CardTitle className="text-base">Caption</CardTitle>
+                <Button variant="ghost" size="sm" onClick={copyCaption}>
+                  <Copy className="h-4 w-4 mr-2" />
+                  Salin
+                </Button>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <EditableField
+                  value={editCaption}
+                  onChange={setEditCaption}
+                  multiline
+                  placeholder="Tulis caption di sini..."
+                  displayClassName="whitespace-pre-wrap text-sm"
+                />
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground mb-2">Hashtags</p>
+                  <EditableField
+                    value={editHashtags}
+                    onChange={setEditHashtags}
+                    placeholder="#hashtag1 #hashtag2 ..."
+                    displayClassName="text-sm text-primary"
+                  />
+                </div>
+              </CardContent>
+            </Card>
 
-            {/* Notes */}
-            {schedule.notes && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-base">Catatan</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-                    {schedule.notes}
-                  </p>
-                </CardContent>
-              </Card>
-            )}
+            {/* Notes - Always shown, editable */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Catatan</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <EditableField
+                  value={editNotes}
+                  onChange={setEditNotes}
+                  multiline
+                  placeholder="Tambah catatan..."
+                  displayClassName="text-sm text-muted-foreground whitespace-pre-wrap"
+                />
+              </CardContent>
+            </Card>
           </div>
 
           {/* Right Column - Actions & Info */}
           <div className="space-y-6">
+            {/* Save Button (mobile-friendly) */}
+            {hasChanges && (
+              <Card className="border-primary">
+                <CardContent className="pt-6">
+                  <Button onClick={handleSave} disabled={isSaving} className="w-full">
+                    <Save className="h-4 w-4 mr-2" />
+                    {isSaving ? "Menyimpan..." : "Simpan Perubahan"}
+                  </Button>
+                  <p className="text-xs text-muted-foreground text-center mt-2">
+                    Ada perubahan yang belum disimpan
+                  </p>
+                </CardContent>
+              </Card>
+            )}
+
             {/* Quick Actions */}
             {schedule.status === "scheduled" && (
               <Card>
@@ -303,9 +381,7 @@ const ScheduleDetail = () => {
                   </Badge>
                 </div>
                 {schedule.notification_email && schedule.email_address && (
-                  <p className="text-xs text-muted-foreground pl-6">
-                    {schedule.email_address}
-                  </p>
+                  <p className="text-xs text-muted-foreground pl-6">{schedule.email_address}</p>
                 )}
                 <Separator />
                 <div className="flex items-center justify-between text-sm">
@@ -318,9 +394,7 @@ const ScheduleDetail = () => {
                   </Badge>
                 </div>
                 {schedule.notification_whatsapp && schedule.whatsapp_number && (
-                  <p className="text-xs text-muted-foreground pl-6">
-                    {schedule.whatsapp_number}
-                  </p>
+                  <p className="text-xs text-muted-foreground pl-6">{schedule.whatsapp_number}</p>
                 )}
               </CardContent>
             </Card>
