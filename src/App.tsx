@@ -16,6 +16,7 @@ import ContentScheduling from "./pages/ContentScheduling";
 import CreateSchedule from "./pages/CreateSchedule";
 import ScheduleDetail from "./pages/ScheduleDetail";
 import NotFound from "./pages/NotFound";
+import CommandCenter from "./pages/CommandCenter";
 
 const queryClient = new QueryClient();
 
@@ -37,6 +38,7 @@ const App = () => (
             <Route path="/scheduling" element={<ProtectedRoute><ContentScheduling /></ProtectedRoute>} />
             <Route path="/scheduling/create" element={<ProtectedRoute><CreateSchedule /></ProtectedRoute>} />
             <Route path="/scheduling/:id" element={<ProtectedRoute><ScheduleDetail /></ProtectedRoute>} />
+            <Route path="/command-center" element={<ProtectedRoute><CommandCenter /></ProtectedRoute>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

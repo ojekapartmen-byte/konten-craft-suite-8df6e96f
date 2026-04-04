@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
+  Grid2X2,
   FileText,
   Mic2,
   ImageIcon,
@@ -18,6 +19,7 @@ import { UserMenu } from "./UserMenu";
 
 const navItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/" },
+  { icon: Grid2X2, label: "Command Center", path: "/command-center" },
   { icon: FileText, label: "Text Generator", path: "/text" },
   { icon: Mic2, label: "Voice Dubbing", path: "/voice" },
   { icon: ImageIcon, label: "Image Generator", path: "/image" },
