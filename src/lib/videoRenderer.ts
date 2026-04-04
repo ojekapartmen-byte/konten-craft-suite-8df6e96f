@@ -63,7 +63,7 @@ export class VideoRenderer {
     return this.loadImage(slide.src);
   }
 
-  private drawImageCover(img: HTMLImageElement) {
+  private drawImageCover(img: HTMLImageElement | HTMLVideoElement) {
     const { width, height } = this.canvas;
     const imgRatio = img.width / img.height;
     const canvasRatio = width / height;
