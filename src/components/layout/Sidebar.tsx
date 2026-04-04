@@ -9,6 +9,7 @@ import {
   Film,
   CalendarClock,
   Sparkles,
+  Globe,
 } from "lucide-react";
 import { UserMenu } from "./UserMenu";
 
@@ -20,6 +21,12 @@ const navItems = [
   { icon: Video, label: "Video Generator", path: "/video" },
   { icon: Film, label: "Edit Video", path: "/edit-video" },
   { icon: CalendarClock, label: "Scheduling", path: "/scheduling" },
+  {
+    icon: Globe,
+    label: "TaskFlow",
+    path: "https://ebranxmels.lovable.app",
+    isExternal: true,
+  },
 ];
 
 export const Sidebar = () => {
@@ -45,22 +52,40 @@ export const Sidebar = () => {
         <nav className="flex-1 space-y-1 px-3 py-4">
           {navItems.map((item) => {
             const isActive = location.pathname === item.path;
-            return (
-              <Link
-                key={item.path}
-                to={item.path}
-                className={cn(
-                  "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
-                  isActive
-                    ? "bg-primary/10 text-primary"
-                    : "text-muted-foreground hover:bg-secondary hover:text-foreground"
-                )}
-              >
+            const content = (
+              <>
                 <item.icon className={cn("h-5 w-5", isActive && "text-primary")} />
                 {item.label}
                 {isActive && (
                   <div className="ml-auto h-1.5 w-1.5 rounded-full bg-primary" />
                 )}
+              </>
+            );
+
+            const className = cn(
+              "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
+              isActive
+                ? "bg-primary/10 text-primary"
+                : "text-muted-foreground hover:bg-secondary hover:text-foreground"
+            );
+
+            if ("isExternal" in item && item.isExternal) {
+              return (
+                <a
+                  key={item.path}
+                  href={item.path}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={className}
+                >
+                  {content}
+                </a>
+              );
+            }
+
+            return (
+              <Link key={item.path} to={item.path} className={className}>
+                {content}
               </Link>
             );
           })}
