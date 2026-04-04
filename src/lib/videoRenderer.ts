@@ -24,7 +24,7 @@ export class VideoRenderer {
     this.ctx = this.canvas.getContext('2d')!;
   }
 
-  private async loadImage(src: string): Promise<HTMLImageElement> {
+  private async loadImage(src: string): Promise<HTMLImageElement | HTMLVideoElement> {
     return new Promise((resolve, reject) => {
       const img = new Image();
       img.crossOrigin = 'anonymous';
@@ -32,6 +32,35 @@ export class VideoRenderer {
       img.onerror = reject;
       img.src = src;
     });
+  }
+
+  private async loadVideo(src: string): Promise<HTMLVideoElement> {
+    return new Promise((resolve, reject) => {
+      const video = document.createElement('video');
+      video.crossOrigin = 'anonymous';
+      video.muted = true;
+      video.playsInline = true;
+      video.preload = 'auto';
+      video.onloadeddata = () => resolve(video);
+      video.onerror = () => reject(new Error('Failed to load video source'));
+      video.src = src;
+      video.load();
+    });
+  }
+
+  private async loadMedia(slide: SlideImage): Promise<HTMLImageElement | HTMLVideoElement> {
+    if (slide.type === 'video') {
+      try {
+        return await this.loadVideo(slide.src);
+      } catch {
+        // Fallback to thumbnail if available
+        if (slide.thumbnailUrl) {
+          return await this.loadImage(slide.thumbnailUrl);
+        }
+        throw new Error(`Failed to load video: ${slide.name}`);
+      }
+    }
+    return this.loadImage(slide.src);
   }
 
   private drawImageCover(img: HTMLImageElement) {
