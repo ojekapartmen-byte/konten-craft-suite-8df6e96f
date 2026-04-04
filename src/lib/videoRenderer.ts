@@ -86,7 +86,7 @@ export class VideoRenderer {
     this.ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
   }
 
-  private drawSlide(img: HTMLImageElement, opacity: number = 1, scale: number = 1) {
+  private drawSlide(img: HTMLImageElement | HTMLVideoElement, opacity: number = 1, scale: number = 1) {
     this.ctx.save();
     this.ctx.globalAlpha = opacity;
     
