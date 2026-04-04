@@ -87,7 +87,7 @@ export const VoiceHistory = ({
             </p>
           </div>
         ) : (
-          <div className="space-y-3 pr-4">
+          <div className="space-y-3 pr-2 md:pr-4">
             {filteredHistory.map((result) => (
               <div
                 key={result.id}

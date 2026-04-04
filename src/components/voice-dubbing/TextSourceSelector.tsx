@@ -84,7 +84,7 @@ export const TextSourceSelector = ({
             </div>
           ) : (
             <ScrollArea className="h-[200px]">
-              <div className="space-y-2 pr-4">
+              <div className="space-y-2 pr-2 md:pr-4">
                 {drafts.map((draft) => (
                   <button
                     key={draft.id}
