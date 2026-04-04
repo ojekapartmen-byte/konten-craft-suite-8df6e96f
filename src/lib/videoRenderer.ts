@@ -162,6 +162,15 @@ export class VideoRenderer {
 
     // Preload all media (images and videos)
     const images = await Promise.all(slides.map(s => this.loadMedia(s)));
+
+    // Start playing video elements so frames can be captured
+    for (const media of images) {
+      if (media instanceof HTMLVideoElement) {
+        media.muted = true;
+        media.currentTime = 0;
+        try { await media.play(); } catch { /* ignore autoplay issues */ }
+      }
+    }
     
     // Calculate total frames
     const transitionDuration = 0.5; // 0.5 seconds for transitions
