@@ -31,6 +31,28 @@ const VideoGenerator = () => {
   const [transition, setTransition] = useState<TransitionType>('fade');
   const [aspectRatio, setAspectRatio] = useState<VideoAspectRatio>('16:9');
   const [uploadedVideo, setUploadedVideo] = useState<UploadedVideo | undefined>(undefined);
+
+  const handleVideoUpload = (video: UploadedVideo) => {
+    setUploadedVideo(video);
+    // Add video as a slide
+    const videoSlide: SlideImage = {
+      id: video.id,
+      src: video.src,
+      name: video.name,
+      duration: Math.round(video.duration),
+      source: 'upload',
+      type: 'video',
+      thumbnailUrl: video.thumbnailUrl,
+    };
+    setSlides(prev => [...prev, videoSlide]);
+  };
+
+  const handleVideoRemove = () => {
+    if (uploadedVideo) {
+      setSlides(prev => prev.filter(s => s.id !== uploadedVideo.id));
+    }
+    setUploadedVideo(undefined);
+  };
   const [isLoading, setIsLoading] = useState(false);
   const [isGenerated, setIsGenerated] = useState(false);
   const [isRendering, setIsRendering] = useState(false);
