@@ -185,14 +185,27 @@ export const SlideshowPreview = ({
         {slides.length > 0 ? (
           <>
             <div className={`relative h-full w-full ${getTransitionClass()}`}>
-              <img
-                src={slides[currentSlide]?.src}
-                alt={`Slide ${currentSlide + 1}`}
-                className="h-full w-full object-cover"
-              />
+              {slides[currentSlide]?.type === 'video' ? (
+                <video
+                  src={slides[currentSlide]?.src}
+                  className="h-full w-full object-cover"
+                  muted={isMuted}
+                  autoPlay={isPlaying}
+                  loop
+                />
+              ) : (
+                <img
+                  src={slides[currentSlide]?.src}
+                  alt={`Slide ${currentSlide + 1}`}
+                  className="h-full w-full object-cover"
+                />
+              )}
               
               {/* Slide indicator */}
-              <div className="absolute top-3 right-3 rounded-full bg-black/50 px-2 py-1 text-xs text-white">
+              <div className="absolute top-3 right-3 rounded-full bg-black/50 px-2 py-1 text-xs text-white flex items-center gap-1">
+                {slides[currentSlide]?.type === 'video' && (
+                  <Play className="h-3 w-3" />
+                )}
                 {currentSlide + 1} / {slides.length}
               </div>
             </div>
