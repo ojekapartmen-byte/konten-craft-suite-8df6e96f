@@ -311,15 +311,28 @@ export const SlideshowPreview = ({
             <button
               key={slide.id}
               onClick={() => goToSlide(index)}
-              className={`flex-shrink-0 rounded overflow-hidden border-2 transition-colors ${
+              className={`relative flex-shrink-0 rounded overflow-hidden border-2 transition-colors ${
                 currentSlide === index ? 'border-primary' : 'border-transparent'
               }`}
             >
-              <img
-                src={slide.src}
-                alt={`Thumbnail ${index + 1}`}
-                className="h-12 w-16 object-cover"
-              />
+              {slide.type === 'video' ? (
+                <>
+                  <img
+                    src={slide.thumbnailUrl || ''}
+                    alt={`Video ${index + 1}`}
+                    className="h-12 w-16 object-cover"
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                    <Play className="h-3 w-3 text-white" />
+                  </div>
+                </>
+              ) : (
+                <img
+                  src={slide.src}
+                  alt={`Thumbnail ${index + 1}`}
+                  className="h-12 w-16 object-cover"
+                />
+              )}
             </button>
           ))}
         </div>
