@@ -65,7 +65,9 @@ export class VideoRenderer {
 
   private drawImageCover(img: HTMLImageElement | HTMLVideoElement) {
     const { width, height } = this.canvas;
-    const imgRatio = img.width / img.height;
+    const imgWidth = img instanceof HTMLVideoElement ? img.videoWidth : img.width;
+    const imgHeight = img instanceof HTMLVideoElement ? img.videoHeight : img.height;
+    const imgRatio = imgWidth / imgHeight;
     const canvasRatio = width / height;
 
     let drawWidth = width;
