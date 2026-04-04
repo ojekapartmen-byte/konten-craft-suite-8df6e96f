@@ -4,6 +4,8 @@ export interface SlideImage {
   name: string;
   duration: number; // seconds per slide
   source: 'upload' | 'generator';
+  type?: 'image' | 'video'; // default 'image'
+  thumbnailUrl?: string;
 }
 
 export interface AudioTrack {

@@ -304,8 +304,8 @@ const VideoGenerator = () => {
 
               <VideoSourceSelector
                 uploadedVideo={uploadedVideo}
-                onVideoUpload={setUploadedVideo}
-                onVideoRemove={() => setUploadedVideo(undefined)}
+                onVideoUpload={handleVideoUpload}
+                onVideoRemove={handleVideoRemove}
               />
             </div>
 
