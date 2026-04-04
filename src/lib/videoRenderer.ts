@@ -102,8 +102,8 @@ export class VideoRenderer {
   }
 
   private async renderFrame(
-    currentImg: HTMLImageElement,
-    nextImg: HTMLImageElement | null,
+    currentImg: HTMLImageElement | HTMLVideoElement,
+    nextImg: HTMLImageElement | HTMLVideoElement | null,
     transition: TransitionType,
     transitionProgress: number
   ) {
