@@ -46,7 +46,7 @@ export const TextSourceSelector = ({
             key={source.id}
             onClick={() => onSourceTypeChange(source.id)}
             className={cn(
-              "flex items-center gap-3 rounded-lg border p-4 text-left transition-all",
+              "flex items-center gap-3 rounded-lg border p-3 md:p-4 text-left transition-all min-w-0",
               sourceType === source.id
                 ? "border-primary bg-primary/10"
                 : "border-border bg-secondary/30 hover:bg-secondary/50"
