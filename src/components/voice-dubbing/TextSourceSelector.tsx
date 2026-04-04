@@ -46,24 +46,24 @@ export const TextSourceSelector = ({
             key={source.id}
             onClick={() => onSourceTypeChange(source.id)}
             className={cn(
-              "flex items-center gap-3 rounded-lg border p-4 text-left transition-all",
+              "flex items-center gap-3 rounded-lg border p-3 md:p-4 text-left transition-all min-w-0",
               sourceType === source.id
                 ? "border-primary bg-primary/10"
                 : "border-border bg-secondary/30 hover:bg-secondary/50"
             )}
           >
             <source.icon className={cn(
-              "h-5 w-5",
+              "h-5 w-5 shrink-0",
               sourceType === source.id ? "text-primary" : "text-muted-foreground"
             )} />
-            <div>
+            <div className="min-w-0">
               <p className={cn(
-                "font-medium text-sm",
+                "font-medium text-sm truncate",
                 sourceType === source.id ? "text-primary" : "text-foreground"
               )}>
                 {source.label}
               </p>
-              <p className="text-xs text-muted-foreground">{source.description}</p>
+              <p className="text-xs text-muted-foreground truncate">{source.description}</p>
             </div>
           </button>
         ))}
@@ -84,7 +84,7 @@ export const TextSourceSelector = ({
             </div>
           ) : (
             <ScrollArea className="h-[200px]">
-              <div className="space-y-2 pr-4">
+              <div className="space-y-2 pr-2 md:pr-4">
                 {drafts.map((draft) => (
                   <button
                     key={draft.id}
