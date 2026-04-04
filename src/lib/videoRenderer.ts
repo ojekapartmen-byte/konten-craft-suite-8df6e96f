@@ -24,7 +24,7 @@ export class VideoRenderer {
     this.ctx = this.canvas.getContext('2d')!;
   }
 
-  private async loadImage(src: string): Promise<HTMLImageElement> {
+  private async loadImage(src: string): Promise<HTMLImageElement | HTMLVideoElement> {
     return new Promise((resolve, reject) => {
       const img = new Image();
       img.crossOrigin = 'anonymous';
@@ -34,9 +34,40 @@ export class VideoRenderer {
     });
   }
 
-  private drawImageCover(img: HTMLImageElement) {
+  private async loadVideo(src: string): Promise<HTMLVideoElement> {
+    return new Promise((resolve, reject) => {
+      const video = document.createElement('video');
+      video.crossOrigin = 'anonymous';
+      video.muted = true;
+      video.playsInline = true;
+      video.preload = 'auto';
+      video.onloadeddata = () => resolve(video);
+      video.onerror = () => reject(new Error('Failed to load video source'));
+      video.src = src;
+      video.load();
+    });
+  }
+
+  private async loadMedia(slide: SlideImage): Promise<HTMLImageElement | HTMLVideoElement> {
+    if (slide.type === 'video') {
+      try {
+        return await this.loadVideo(slide.src);
+      } catch {
+        // Fallback to thumbnail if available
+        if (slide.thumbnailUrl) {
+          return await this.loadImage(slide.thumbnailUrl);
+        }
+        throw new Error(`Failed to load video: ${slide.name}`);
+      }
+    }
+    return this.loadImage(slide.src);
+  }
+
+  private drawImageCover(img: HTMLImageElement | HTMLVideoElement) {
     const { width, height } = this.canvas;
-    const imgRatio = img.width / img.height;
+    const imgWidth = img instanceof HTMLVideoElement ? img.videoWidth : img.width;
+    const imgHeight = img instanceof HTMLVideoElement ? img.videoHeight : img.height;
+    const imgRatio = imgWidth / imgHeight;
     const canvasRatio = width / height;
 
     let drawWidth = width;
@@ -55,7 +86,7 @@ export class VideoRenderer {
     this.ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
   }
 
-  private drawSlide(img: HTMLImageElement, opacity: number = 1, scale: number = 1) {
+  private drawSlide(img: HTMLImageElement | HTMLVideoElement, opacity: number = 1, scale: number = 1) {
     this.ctx.save();
     this.ctx.globalAlpha = opacity;
     
@@ -71,8 +102,8 @@ export class VideoRenderer {
   }
 
   private async renderFrame(
-    currentImg: HTMLImageElement,
-    nextImg: HTMLImageElement | null,
+    currentImg: HTMLImageElement | HTMLVideoElement,
+    nextImg: HTMLImageElement | HTMLVideoElement | null,
     transition: TransitionType,
     transitionProgress: number
   ) {
@@ -129,8 +160,17 @@ export class VideoRenderer {
       throw new Error('No slides to render');
     }
 
-    // Preload all images
-    const images = await Promise.all(slides.map(s => this.loadImage(s.src)));
+    // Preload all media (images and videos)
+    const images = await Promise.all(slides.map(s => this.loadMedia(s)));
+
+    // Start playing video elements so frames can be captured
+    for (const media of images) {
+      if (media instanceof HTMLVideoElement) {
+        media.muted = true;
+        media.currentTime = 0;
+        try { await media.play(); } catch { /* ignore autoplay issues */ }
+      }
+    }
     
     // Calculate total frames
     const transitionDuration = 0.5; // 0.5 seconds for transitions
