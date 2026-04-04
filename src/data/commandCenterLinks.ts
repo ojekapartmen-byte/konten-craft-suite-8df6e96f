@@ -7,6 +7,7 @@ export const commandCenterCategories: CommandCenterCategory[] = [
     id: "deploy",
     title: "Deploy & Hosting",
     description: "Rilis, domain, dan environment",
+    color: "#6366f1",
     items: [
       {
         id: "vercel",
@@ -30,6 +31,7 @@ export const commandCenterCategories: CommandCenterCategory[] = [
     id: "backend",
     title: "Backend",
     description: "Database, auth, functions",
+    color: "#10b981",
     items: [
       {
         id: "supabase",
@@ -45,6 +47,7 @@ export const commandCenterCategories: CommandCenterCategory[] = [
     id: "product",
     title: "Produk & Dokumen",
     description: "Dokumentasi, to-do, dan aset",
+    color: "#f59e0b",
     items: [
       {
         id: "notion",
@@ -68,6 +71,7 @@ export const commandCenterCategories: CommandCenterCategory[] = [
     id: "internal",
     title: "Internal",
     description: "Shortcut ke fitur dalam aplikasi",
+    color: "#22c55e",
     items: [
       {
         id: "ai-studio-home",
@@ -88,4 +92,3 @@ export const commandCenterCategories: CommandCenterCategory[] = [
     ],
   },
 ];
-

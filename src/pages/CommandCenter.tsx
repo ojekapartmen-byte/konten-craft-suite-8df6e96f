@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { commandCenterConfigFileHint } from "@/data/commandCenterLinks";
 import { useCommandCenterStore } from "@/hooks/useCommandCenterStore";
 import { CategorySection } from "@/components/command-center/CategorySection";
+import { CommandCenterEditor } from "@/components/command-center/CommandCenterEditor";
 import { countCommandCenterItems, filterCommandCenterCategories } from "@/utils/commandCenterSearch";
 
 const CommandCenter = () => {
@@ -60,6 +61,7 @@ const CommandCenter = () => {
                 <span>{totalItems} shortcut</span>
               )}
             </div>
+            <CommandCenterEditor />
             <Button
               type="button"
               variant="secondary"
@@ -72,7 +74,7 @@ const CommandCenter = () => {
         </div>
 
         <div className="mt-3 text-xs text-muted-foreground">
-          Edit daftar link lewat file <span className="font-medium text-foreground">{commandCenterConfigFileHint}</span>
+          Default list dari <span className="font-medium text-foreground">{commandCenterConfigFileHint}</span>, edit via tombol “Edit List” akan tersimpan lokal di browser.
         </div>
       </div>
 
@@ -94,4 +96,3 @@ const CommandCenter = () => {
 };
 
 export default CommandCenter;
-

@@ -126,20 +126,24 @@ export class VideoRenderer {
           break;
 
         case 'slide':
-          const slideOffset = transitionProgress * width;
-          this.ctx.save();
-          this.ctx.translate(-slideOffset, 0);
-          this.drawSlide(currentImg);
-          this.ctx.translate(width, 0);
-          this.drawSlide(nextImg);
-          this.ctx.restore();
+          {
+            const slideOffset = transitionProgress * width;
+            this.ctx.save();
+            this.ctx.translate(-slideOffset, 0);
+            this.drawSlide(currentImg);
+            this.ctx.translate(width, 0);
+            this.drawSlide(nextImg);
+            this.ctx.restore();
+          }
           break;
 
         case 'zoom':
-          const zoomOut = 1 + (transitionProgress * 0.2);
-          const zoomIn = 0.8 + (transitionProgress * 0.2);
-          this.drawSlide(currentImg, 1 - transitionProgress, zoomOut);
-          this.drawSlide(nextImg, transitionProgress, zoomIn);
+          {
+            const zoomOut = 1 + (transitionProgress * 0.2);
+            const zoomIn = 0.8 + (transitionProgress * 0.2);
+            this.drawSlide(currentImg, 1 - transitionProgress, zoomOut);
+            this.drawSlide(nextImg, transitionProgress, zoomIn);
+          }
           break;
 
         default:

@@ -178,7 +178,7 @@ function convertDates(text: string): string {
   let result = text;
   
   // DD/MM/YYYY or DD-MM-YYYY
-  result = result.replace(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/g, (_, d, m, y) => {
+  result = result.replace(/(\d{1,2})[/-](\d{1,2})[/-](\d{4})/g, (_, d, m, y) => {
     const day = parseInt(d, 10);
     const month = parseInt(m, 10) - 1;
     const year = parseInt(y, 10);
@@ -310,7 +310,7 @@ export function getPreprocessingChanges(original: string, processed: string): { 
   const changes: { original: string; processed: string }[] = [];
   
   // Find numeric changes
-  const numPattern = /Rp\s*[\d.,]+\s*(?:triliun|miliar|juta|ribu)?|\$[\d.,]+|\d+[.,]?\d*|\b\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4}\b|\b\d{1,2}\s+(?:Januari|Februari|Maret|April|Mei|Juni|Juli|Agustus|September|Oktober|November|Desember)\s+\d{4}\b/gi;
+  const numPattern = /Rp\s*[\d.,]+\s*(?:triliun|miliar|juta|ribu)?|\$[\d.,]+|\d+[.,]?\d*|\b\d{1,2}[/-]\d{1,2}[/-]\d{4}\b|\b\d{1,2}\s+(?:Januari|Februari|Maret|April|Mei|Juni|Juli|Agustus|September|Oktober|November|Desember)\s+\d{4}\b/gi;
   
   const originalMatches = original.match(numPattern) || [];
   

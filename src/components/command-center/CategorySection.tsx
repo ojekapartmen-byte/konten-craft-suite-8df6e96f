@@ -11,7 +11,16 @@ export const CategorySection = ({ category, onInternalNavigate }: CategorySectio
     <section className="animate-fade-in">
       <div className="mb-3 flex items-end justify-between gap-3">
         <div className="min-w-0">
-          <h2 className="font-display text-base font-semibold text-foreground truncate">{category.title}</h2>
+          <div className="flex items-center gap-2">
+            {category.color ? (
+              <span
+                className="h-2.5 w-2.5 shrink-0 rounded-full border border-border"
+                style={{ backgroundColor: category.color }}
+                aria-label={`Warna kategori ${category.title}`}
+              />
+            ) : null}
+            <h2 className="font-display text-base font-semibold text-foreground truncate">{category.title}</h2>
+          </div>
           {category.description ? (
             <p className="mt-0.5 text-xs text-muted-foreground truncate">{category.description}</p>
           ) : null}
@@ -27,4 +36,3 @@ export const CategorySection = ({ category, onInternalNavigate }: CategorySectio
     </section>
   );
 };
-

@@ -19,9 +19,21 @@ export const ShortcutTile = ({ item, onInternalNavigate }: ShortcutTileProps) =>
       )}
     >
       <div className="flex items-start gap-3">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/15 text-primary">
-          {isExternal ? <ExternalLink className="h-5 w-5" /> : <Link2 className="h-5 w-5" />}
-        </div>
+        {item.thumbnailUrl ? (
+          <div className="h-10 w-10 shrink-0 overflow-hidden rounded-lg border border-border bg-secondary">
+            <img
+              src={item.thumbnailUrl}
+              alt={item.title}
+              className="h-full w-full object-cover"
+              loading="lazy"
+              referrerPolicy="no-referrer"
+            />
+          </div>
+        ) : (
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/15 text-primary">
+            {isExternal ? <ExternalLink className="h-5 w-5" /> : <Link2 className="h-5 w-5" />}
+          </div>
+        )}
         <div className="min-w-0 flex-1">
           <div className="flex items-start gap-2">
             <h3 className="min-w-0 font-display text-sm font-semibold text-foreground truncate">{item.title}</h3>
@@ -65,4 +77,3 @@ export const ShortcutTile = ({ item, onInternalNavigate }: ShortcutTileProps) =>
     </button>
   );
 };
-
