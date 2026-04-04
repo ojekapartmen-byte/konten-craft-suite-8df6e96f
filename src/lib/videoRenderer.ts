@@ -160,8 +160,8 @@ export class VideoRenderer {
       throw new Error('No slides to render');
     }
 
-    // Preload all images
-    const images = await Promise.all(slides.map(s => this.loadImage(s.src)));
+    // Preload all media (images and videos)
+    const images = await Promise.all(slides.map(s => this.loadMedia(s)));
     
     // Calculate total frames
     const transitionDuration = 0.5; // 0.5 seconds for transitions
