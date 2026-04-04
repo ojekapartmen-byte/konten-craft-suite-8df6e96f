@@ -53,17 +53,17 @@ export const TextSourceSelector = ({
             )}
           >
             <source.icon className={cn(
-              "h-5 w-5",
+              "h-5 w-5 shrink-0",
               sourceType === source.id ? "text-primary" : "text-muted-foreground"
             )} />
-            <div>
+            <div className="min-w-0">
               <p className={cn(
-                "font-medium text-sm",
+                "font-medium text-sm truncate",
                 sourceType === source.id ? "text-primary" : "text-foreground"
               )}>
                 {source.label}
               </p>
-              <p className="text-xs text-muted-foreground">{source.description}</p>
+              <p className="text-xs text-muted-foreground truncate">{source.description}</p>
             </div>
           </button>
         ))}

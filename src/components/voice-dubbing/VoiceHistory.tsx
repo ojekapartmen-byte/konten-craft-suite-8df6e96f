@@ -52,7 +52,7 @@ export const VoiceHistory = ({
   };
 
   return (
-    <div className="glass-card rounded-xl p-6">
+    <div className="glass-card rounded-xl p-4 md:p-6 overflow-hidden">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <History className="h-5 w-5 text-primary" />
