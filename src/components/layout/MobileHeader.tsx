@@ -16,6 +16,7 @@ import {
   Globe,
 } from "lucide-react";
 import { UserMenu } from "./UserMenu";
+import { ThemeToggle } from "../ThemeToggle";
 
 const navItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/" },
@@ -51,6 +52,7 @@ export const MobileHeader = () => {
           </span>
         </div>
         <div className="flex items-center gap-2">
+          <ThemeToggle />
           <UserMenu />
           <button
             onClick={() => setIsOpen(!isOpen)}

@@ -13,6 +13,7 @@ import {
   Globe,
 } from "lucide-react";
 import { UserMenu } from "./UserMenu";
+import { ThemeToggle } from "../ThemeToggle";
 
 const navItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/" },
@@ -47,7 +48,10 @@ export const Sidebar = () => {
               AI<span className="gradient-text">Studio</span>
             </span>
           </div>
-          <UserMenu />
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <UserMenu />
+          </div>
         </div>
 
         {/* Navigation */}
