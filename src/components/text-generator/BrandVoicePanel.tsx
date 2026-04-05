@@ -87,7 +87,7 @@ export const BrandVoicePanel = ({ brandVoice, onBrandVoiceChange }: BrandVoicePa
         <button className="flex w-full items-center justify-between rounded-lg border border-border bg-secondary/30 p-3 text-left transition-all hover:bg-secondary/50">
           <div className="flex items-center gap-2">
             <Building2 className="h-4 w-4 text-primary" />
-            <span className="text-sm font-medium">Brand Voice & Audiens</span>
+            <span className="text-sm font-medium">Brand & Audiens</span>
           </div>
           <ChevronDown className={cn("h-4 w-4 transition-transform", isOpen && "rotate-180")} />
         </button>
