@@ -12,7 +12,7 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 const ContentScheduling = () => {
   const navigate = useNavigate();
-  const [viewMode, setViewMode] = useState<"list" | "weekly" | "calendar">("weekly");
+  const [viewMode, setViewMode] = useState<"list" | "weekly" | "calendar">("list");
   const {
     schedules,
     isLoading,

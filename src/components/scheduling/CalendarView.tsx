@@ -61,17 +61,17 @@ export const CalendarView = ({
   const weekDays = ["Sen", "Sel", "Rab", "Kam", "Jum", "Sab", "Min"];
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 overflow-hidden">
       {/* Calendar Header */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="icon" onClick={previousMonth}>
+        <div className="flex items-center gap-1 md:gap-2">
+          <Button variant="outline" size="icon" onClick={previousMonth} className="h-8 w-8 md:h-9 md:w-9">
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <Button variant="outline" size="icon" onClick={nextMonth}>
+          <Button variant="outline" size="icon" onClick={nextMonth} className="h-8 w-8 md:h-9 md:w-9">
             <ChevronRight className="h-4 w-4" />
           </Button>
-          <h2 className="text-lg font-semibold ml-2">
+          <h2 className="text-sm md:text-lg font-semibold ml-1 md:ml-2">
             {format(currentMonth, "MMMM yyyy", { locale: localeId })}
           </h2>
         </div>
@@ -87,7 +87,7 @@ export const CalendarView = ({
           {weekDays.map((day) => (
             <div
               key={day}
-              className="p-2 text-center text-sm font-medium text-muted-foreground border-b"
+              className="p-1 md:p-2 text-center text-[10px] md:text-sm font-medium text-muted-foreground border-b"
             >
               {day}
             </div>
@@ -104,14 +104,14 @@ export const CalendarView = ({
               <div
                 key={index}
                 className={cn(
-                  "min-h-[100px] p-1 border-b border-r last:border-r-0",
+                  "min-h-[60px] md:min-h-[100px] p-0.5 md:p-1 border-b border-r last:border-r-0",
                   "[&:nth-child(7n)]:border-r-0",
                   !isCurrentMonth && "bg-muted/30"
                 )}
               >
                 <div
                   className={cn(
-                    "text-sm font-medium p-1 rounded-full w-7 h-7 flex items-center justify-center mb-1",
+                    "text-[10px] md:text-sm font-medium p-0.5 md:p-1 rounded-full w-5 h-5 md:w-7 md:h-7 flex items-center justify-center mb-0.5 md:mb-1",
                     isToday(day) && "bg-primary text-primary-foreground",
                     !isCurrentMonth && "text-muted-foreground"
                   )}
@@ -119,26 +119,26 @@ export const CalendarView = ({
                   {format(day, "d")}
                 </div>
 
-                <div className="space-y-1">
-                  {daySchedules.slice(0, 3).map((schedule) => {
+                <div className="space-y-0.5 md:space-y-1">
+                  {daySchedules.slice(0, 2).map((schedule) => {
                     const platformInfo = getPlatformInfo(schedule.platform);
                     return (
                       <div
                         key={schedule.id}
                         onClick={() => navigate(`/scheduling/${schedule.id}`)}
                         className={cn(
-                          "text-xs p-1 rounded cursor-pointer truncate hover:ring-1 hover:ring-primary/50 transition-all",
+                          "text-[8px] md:text-xs p-0.5 md:p-1 rounded cursor-pointer truncate hover:ring-1 hover:ring-primary/50 transition-all",
                           getStatusColor(schedule.status, schedule.scheduled_at)
                         )}
                       >
-                        <span className="mr-1">{platformInfo.icon}</span>
-                        {schedule.title}
+                        <span className="mr-0.5">{platformInfo.icon}</span>
+                        <span className="hidden md:inline">{schedule.title}</span>
                       </div>
                     );
                   })}
-                  {daySchedules.length > 3 && (
-                    <div className="text-xs text-muted-foreground text-center">
-                      +{daySchedules.length - 3} lainnya
+                  {daySchedules.length > 2 && (
+                    <div className="text-[8px] md:text-xs text-muted-foreground text-center">
+                      +{daySchedules.length - 2}
                     </div>
                   )}
                 </div>

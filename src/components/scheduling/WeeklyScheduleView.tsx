@@ -48,7 +48,7 @@ export const WeeklyScheduleView = ({
   const goToToday = () => setCurrentWeekStart(startOfWeek(new Date(), { weekStartsOn: 1 }));
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 overflow-hidden">
       {/* Header Navigation */}
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold">
@@ -67,15 +67,14 @@ export const WeeklyScheduleView = ({
         </div>
       </div>
 
-      {/* Weekly Grid */}
-      <div className="grid grid-cols-7 gap-3">
+      {/* Desktop: Weekly Grid */}
+      <div className="hidden md:grid grid-cols-7 gap-3">
         {weekDays.map((day) => {
           const daySchedules = getSchedulesForDay(day);
           const postCount = daySchedules.length;
 
           return (
             <div key={day.toISOString()} className="min-h-[400px]">
-              {/* Day Header */}
               <div
                 className={`mb-3 pb-2 border-b ${
                   isToday(day) ? "border-primary" : "border-border"
@@ -98,7 +97,6 @@ export const WeeklyScheduleView = ({
                 </p>
               </div>
 
-              {/* Schedule Cards */}
               <div className="space-y-3">
                 {daySchedules.length === 0 ? (
                   <div className="h-20 flex items-center justify-center">
@@ -116,6 +114,55 @@ export const WeeklyScheduleView = ({
                   ))
                 )}
               </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Mobile: Vertical list */}
+      <div className="md:hidden space-y-3">
+        {weekDays.map((day) => {
+          const daySchedules = getSchedulesForDay(day);
+          const postCount = daySchedules.length;
+
+          return (
+            <div
+              key={day.toISOString()}
+              className={`rounded-lg border p-3 ${
+                isToday(day) ? "border-primary bg-primary/5" : "border-border"
+              }`}
+            >
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <span
+                    className={`text-lg font-bold ${
+                      isToday(day) ? "text-primary" : ""
+                    }`}
+                  >
+                    {format(day, "d")}
+                  </span>
+                  <span className="text-sm font-medium text-muted-foreground">
+                    {format(day, "EEEE", { locale: localeId })}
+                  </span>
+                </div>
+                <span className="text-xs text-muted-foreground">
+                  {postCount} Post
+                </span>
+              </div>
+
+              {daySchedules.length > 0 && (
+                <div className="space-y-2">
+                  {daySchedules.map((schedule) => (
+                    <ScheduleCardCompact
+                      key={schedule.id}
+                      schedule={schedule}
+                      onMarkPosted={onMarkPosted}
+                      onSendReminder={onSendReminder}
+                      onDelete={onDelete}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
           );
         })}
