@@ -16,6 +16,7 @@ import {
   Globe,
 } from "lucide-react";
 import { UserMenu } from "./UserMenu";
+import { ThemeToggle } from "../ThemeToggle";
 
 const navItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/" },
