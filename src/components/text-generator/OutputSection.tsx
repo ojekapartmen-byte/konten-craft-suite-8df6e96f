@@ -58,7 +58,7 @@ export const OutputSection = ({ content, isLoading }: OutputSectionProps) => {
 
   if (isLoading) {
     return (
-      <div className="glass-card h-full rounded-xl p-6">
+      <div className="glass-card h-full rounded-xl p-4 md:p-6">
         <div className="flex h-[400px] items-center justify-center">
           <div className="text-center">
             <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
@@ -71,7 +71,7 @@ export const OutputSection = ({ content, isLoading }: OutputSectionProps) => {
 
   if (!content) {
     return (
-      <div className="glass-card h-full rounded-xl p-6">
+      <div className="glass-card h-full rounded-xl p-4 md:p-6">
         <div className="flex h-[400px] flex-col items-center justify-center text-center">
           <FileText className="h-12 w-12 text-muted-foreground/30" />
           <p className="mt-4 text-sm text-muted-foreground">
@@ -86,15 +86,15 @@ export const OutputSection = ({ content, isLoading }: OutputSectionProps) => {
   }
 
   return (
-    <div className="glass-card h-full rounded-xl p-6">
-      <div className="mb-4 flex items-center justify-between">
-        <div>
-          <h3 className="text-sm font-medium text-foreground">{content.title}</h3>
+    <div className="glass-card h-full rounded-xl p-4 md:p-6 overflow-hidden">
+      <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0">
+          <h3 className="truncate text-sm font-medium text-foreground">{content.title}</h3>
           <p className="text-xs text-muted-foreground">
             {content.metadata.wordCount} kata • {content.metadata.duration} detik
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 shrink-0">
           <Button size="sm" variant="outline" onClick={() => handleExport('txt')} className="h-8 gap-1.5 text-xs">
             <FileDown className="h-3.5 w-3.5" />
             TXT
@@ -107,26 +107,26 @@ export const OutputSection = ({ content, isLoading }: OutputSectionProps) => {
       </div>
 
       <Tabs defaultValue="script" className="w-full">
-        <TabsList className="mb-4 w-full justify-start bg-secondary/50">
-          <TabsTrigger value="script" className="gap-1.5 text-xs">
-            <FileText className="h-3.5 w-3.5" />
-            Script
+        <TabsList className="mb-4 w-full justify-start bg-secondary/50 flex-wrap h-auto gap-1 p-1">
+          <TabsTrigger value="script" className="gap-1 text-xs px-2 py-1.5">
+            <FileText className="h-3.5 w-3.5 shrink-0" />
+            <span className="hidden xs:inline sm:inline">Script</span>
           </TabsTrigger>
-          <TabsTrigger value="caption" className="gap-1.5 text-xs">
-            <Hash className="h-3.5 w-3.5" />
-            Caption
+          <TabsTrigger value="caption" className="gap-1 text-xs px-2 py-1.5">
+            <Hash className="h-3.5 w-3.5 shrink-0" />
+            <span className="hidden xs:inline sm:inline">Caption</span>
           </TabsTrigger>
-          <TabsTrigger value="onscreen" className="gap-1.5 text-xs">
-            <Eye className="h-3.5 w-3.5" />
-            On-Screen
+          <TabsTrigger value="onscreen" className="gap-1 text-xs px-2 py-1.5">
+            <Eye className="h-3.5 w-3.5 shrink-0" />
+            <span className="hidden sm:inline">On-Screen</span>
           </TabsTrigger>
-          <TabsTrigger value="shots" className="gap-1.5 text-xs">
-            <Camera className="h-3.5 w-3.5" />
-            Shot List
+          <TabsTrigger value="shots" className="gap-1 text-xs px-2 py-1.5">
+            <Camera className="h-3.5 w-3.5 shrink-0" />
+            <span className="hidden sm:inline">Shots</span>
           </TabsTrigger>
-          <TabsTrigger value="subtitle" className="gap-1.5 text-xs">
-            <Subtitles className="h-3.5 w-3.5" />
-            Subtitle
+          <TabsTrigger value="subtitle" className="gap-1 text-xs px-2 py-1.5">
+            <Subtitles className="h-3.5 w-3.5 shrink-0" />
+            <span className="hidden sm:inline">Subtitle</span>
           </TabsTrigger>
         </TabsList>
 
