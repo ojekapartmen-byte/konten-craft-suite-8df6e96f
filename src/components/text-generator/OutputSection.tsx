@@ -58,7 +58,7 @@ export const OutputSection = ({ content, isLoading }: OutputSectionProps) => {
 
   if (isLoading) {
     return (
-      <div className="glass-card h-full rounded-xl p-6">
+      <div className="glass-card h-full rounded-xl p-4 md:p-6">
         <div className="flex h-[400px] items-center justify-center">
           <div className="text-center">
             <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
