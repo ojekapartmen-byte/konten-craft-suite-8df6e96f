@@ -209,7 +209,7 @@ const TextGenerator = () => {
         description="Buat script, artikel, dan konten kreatif dalam Bahasa Indonesia"
       />
 
-      <div className="grid gap-6 lg:grid-cols-[1fr,400px] xl:grid-cols-[1fr,450px]">
+      <div className="grid gap-6 lg:grid-cols-[1fr,400px] xl:grid-cols-[1fr,450px] overflow-hidden">
         {/* Left Column - Main Input & Output */}
         <div className="space-y-6">
           {/* Input Section */}
