@@ -71,7 +71,7 @@ export const OutputSection = ({ content, isLoading }: OutputSectionProps) => {
 
   if (!content) {
     return (
-      <div className="glass-card h-full rounded-xl p-6">
+      <div className="glass-card h-full rounded-xl p-4 md:p-6">
         <div className="flex h-[400px] flex-col items-center justify-center text-center">
           <FileText className="h-12 w-12 text-muted-foreground/30" />
           <p className="mt-4 text-sm text-muted-foreground">
